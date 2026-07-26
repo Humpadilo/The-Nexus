@@ -8,6 +8,8 @@
 - Added daily-by-default scheduled read-only checks and configurable resolved-finding retention.
 - Added Watcher Ingress view, findings JSON export, and audit bundle integration.
 - Added Watcher fixtures and persistence, endpoint, scheduler, deduplication, recovery, and classification tests.
+- Verified on Home Assistant OS: Version 0.2.0 installed and started, Ingress loaded, two live snapshots completed, and 143 findings were persisted and shown.
+- Downloaded and validated the live `snapshot-2.json` audit bundle and `watcher-findings.json` export.
 
 ## 0.1.0 - 2026-07-26
 
@@ -16,7 +18,7 @@
 - Documented the GitHub registry credential requirement for private repository installation.
 - The repository is now public; removed the private-credential installation requirement.
 - Verified production installation on Home Assistant OS: Version 0.1.0 ran through Ingress, collected 436 entities (66 unavailable, 102 unknown), persisted SQLite data across reload, and produced a validated downloadable JSON audit bundle.
-- Recorded the five passing Version 0.1 smoke tests and tagged the verified baseline as `v0.1.0`.
+- Recorded the five passing Version 0.1 smoke tests and tagged the verified baseline as `v0.1.0-verified` (the original `v0.1.0` tag remains unchanged).
 
 The project operating documentation is in [`docs/`](docs/README.md), including the [documentation changelog](docs/CHANGELOG.md).
 

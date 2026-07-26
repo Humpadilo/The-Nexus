@@ -6,6 +6,8 @@ This file records why the project works the way it does. It should evolve when f
 
 On 2026-07-26, Version 0.1.0 was installed from `https://github.com/Humpadilo/The-Nexus` into Home Assistant OS. The app started successfully, its Ingress page loaded, and a live snapshot collected 436 entities, including 66 unavailable and 102 unknown entities. The snapshot remained available after an Ingress reload, confirming SQLite persistence. The 706,362-byte JSON audit bundle was downloaded and parsed successfully. The local test suite reported 5 passing tests. This baseline is tagged `v0.1.0`.
 
+The formal Sprint 1 verification close is tagged `v0.1.0-verified`. During the Version 0.2.0 live smoke test on 2026-07-26, Supervisor's stale repository clone was bypassed by adding a fresh public `.git` repository source and reinstalling the app. The upgraded app started successfully, Ingress loaded, two live snapshots completed, and the second snapshot produced 438 entities, 20 unavailable, 122 unknown, and 143 persisted Watcher findings. The 942,137-byte audit bundle and 218,015-byte findings export were downloaded and parsed successfully. The current release is tagged `v0.2.0`.
+
 Watcher begins from this persisted snapshot model. It remains read-only and local; it does not require Codex, ChatGPT, or a cloud service.
 
 ## Current project identity
@@ -54,7 +56,7 @@ No house-mode model or dashboard system is implemented here. Future work must de
 - Version 0.1 does not repair or write Home Assistant configuration.
 - Low-battery and automation classifications are best-effort state-derived summaries.
 - Registry availability depends on Home Assistant API support and permissions.
-- A real Home Assistant OS installation test remains an operational verification step.
+- The original Version 0.1 data was not visible after the Supervisor repository rebind; Version 0.2.0 persistence was re-verified with fresh live snapshots. Future upgrades should preserve and explicitly verify `/data` continuity.
 
 ## Rejected or deferred ideas
 

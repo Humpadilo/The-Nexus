@@ -12,6 +12,12 @@ This documentation changelog follows [Keep a Changelog](https://keepachangelog.c
 - Ingress findings view, JSON export, and audit bundle findings.
 - Watcher specifications, decisions, architecture updates, and tests.
 
+### Live verification
+
+- Verified Version 0.2.0 on Home Assistant OS after rebinding the app to a fresh public repository clone.
+- Completed two live snapshots; the second contained 438 entities, 20 unavailable, 122 unknown, and 143 persisted findings.
+- Downloaded and validated the audit bundle and findings export.
+
 ## [0.1.0] - 2026-07-26
 
 ### Added
@@ -33,4 +39,4 @@ This documentation changelog follows [Keep a Changelog](https://keepachangelog.c
 - Hardened startup paths and mounted the web UI static assets.
 - Added end-to-end API smoke coverage for the Version 0.1 workflow.
 - Completed the live Home Assistant OS smoke test: app running, Ingress loaded, 436 entities collected, 66 unavailable, 102 unknown, SQLite persistence confirmed, and JSON audit bundle downloaded and validated.
-- Tagged the verified baseline `v0.1.0`.
+- Tagged the verified baseline `v0.1.0-verified` (the original `v0.1.0` tag remains unchanged).

@@ -29,7 +29,7 @@ Version 0.1.0 was installed from the public repository on 2026-07-26 and verifie
 - SQLite persistence was confirmed after reloading the Ingress page.
 - The 706,362-byte JSON audit bundle was downloaded and validated.
 - The local test suite passed with 5 tests.
-- The verified release is tagged `v0.1.0`.
+- The original release remains tagged `v0.1.0`; the formally verified close is tagged `v0.1.0-verified`.
 
 ## Sprint 2 — The Watcher — complete
 
@@ -51,7 +51,11 @@ Watcher compares stored snapshots, persists evidence-backed findings, exposes a 
 
 - Local suite: 9 tests passed.
 - Release: `v0.2.0`.
-- Live Home Assistant OS: upgraded app started successfully, Ingress Watcher view loaded, manual comparison check completed, and findings export downloaded and validated.
+- Live Home Assistant OS: the app was rebound to a fresh public repository clone after Supervisor reported a stale repository-cache authentication failure, then installed and started successfully at Version 0.2.0.
+- Ingress loaded and displayed the Watcher view.
+- Two live manual snapshots completed. The second snapshot collected 438 entities, including 20 unavailable and 122 unknown, and generated 143 persisted findings.
+- SQLite persistence was confirmed by the second snapshot and the loaded findings view.
+- `snapshot-2.json` (942,137 bytes) and `watcher-findings.json` (218,015 bytes) downloaded and parsed successfully.
 
 ### Blocked
 
