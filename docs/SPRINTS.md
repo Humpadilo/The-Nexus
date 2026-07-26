@@ -2,7 +2,7 @@
 
 This file tracks current development. Completed sprints remain here as an historical record. Detailed future ideas belong in the roadmap or parking lot.
 
-## Current sprint — Sprint 1: Foundation hardening
+## Current sprint — Sprint 2: The Watcher
 
 ### Completed
 
@@ -17,11 +17,23 @@ This file tracks current development. Completed sprints remain here as an histor
 - [x] Add summary and JSON audit bundle.
 - [x] Add collector, storage, and report unit tests.
 - [x] Add repository metadata and current Home Assistant packaging fixes.
+- [x] Complete the live Home Assistant OS smoke test for Version 0.1.0.
 
-### In progress
+### Sprint 1 production evidence
 
-- [ ] Validate installation on a real Home Assistant OS host from the public repository.
-- [ ] Confirm registry behavior against supported Home Assistant versions.
+Version 0.1.0 was installed from the public repository on 2026-07-26 and verified on Home Assistant OS:
+
+- The app installed and ran successfully.
+- The Ingress page loaded.
+- A live snapshot collected 436 entities, including 66 unavailable and 102 unknown.
+- SQLite persistence was confirmed after reloading the Ingress page.
+- The 706,362-byte JSON audit bundle was downloaded and validated.
+- The local test suite passed with 5 tests.
+- The verified release is tagged `v0.1.0`.
+
+## Sprint 2 — The Watcher
+
+Watcher compares stored snapshots, persists evidence-backed findings, exposes a low-noise Ingress view, and schedules local read-only checks.
 
 ### Blocked
 
@@ -29,9 +41,7 @@ This file tracks current development. Completed sprints remain here as an histor
 
 ### Next sprint
 
-- Define Watcher requirements in `SPEC.md`.
-- Decide whether snapshot history belongs in Version 0.2 or Version 0.3 implementation planning.
-- Add a real installation test procedure to the release checklist.
+- Define Curator requirements and normalization boundaries.
 
 ## Completed sprint history
 

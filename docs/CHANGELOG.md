@@ -22,3 +22,5 @@ This documentation changelog follows [Keep a Changelog](https://keepachangelog.c
 - Documented the local installation and safety boundaries.
 - Hardened startup paths and mounted the web UI static assets.
 - Added end-to-end API smoke coverage for the Version 0.1 workflow.
+- Completed the live Home Assistant OS smoke test: app running, Ingress loaded, 436 entities collected, 66 unavailable, 102 unknown, SQLite persistence confirmed, and JSON audit bundle downloaded and validated.
+- Tagged the verified baseline `v0.1.0`.

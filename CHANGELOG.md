@@ -6,6 +6,8 @@
 - Updated Home Assistant repository metadata and installation instructions.
 - Documented the GitHub registry credential requirement for private repository installation.
 - The repository is now public; removed the private-credential installation requirement.
+- Verified production installation on Home Assistant OS: Version 0.1.0 ran through Ingress, collected 436 entities (66 unavailable, 102 unknown), persisted SQLite data across reload, and produced a validated downloadable JSON audit bundle.
+- Recorded the five passing Version 0.1 smoke tests and tagged the verified baseline as `v0.1.0`.
 
 The project operating documentation is in [`docs/`](docs/README.md), including the [documentation changelog](docs/CHANGELOG.md).
 

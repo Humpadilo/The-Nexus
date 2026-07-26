@@ -2,6 +2,12 @@
 
 This file records why the project works the way it does. It should evolve when facts, assumptions, or lessons change. Do not use it as a task list; use [SPRINTS.md](SPRINTS.md) for active work and [DECISIONS.md](DECISIONS.md) for formal architecture decisions.
 
+## Verified Version 0.1 production baseline
+
+On 2026-07-26, Version 0.1.0 was installed from `https://github.com/Humpadilo/The-Nexus` into Home Assistant OS. The app started successfully, its Ingress page loaded, and a live snapshot collected 436 entities, including 66 unavailable and 102 unknown entities. The snapshot remained available after an Ingress reload, confirming SQLite persistence. The 706,362-byte JSON audit bundle was downloaded and parsed successfully. The local test suite reported 5 passing tests. This baseline is tagged `v0.1.0`.
+
+Watcher begins from this persisted snapshot model. It remains read-only and local; it does not require Codex, ChatGPT, or a cloud service.
+
 ## Current project identity
 
 The Nexus is the long-term system direction. The Archivist is the implemented Version 0.1 subsystem. The name separation prevents future modules from being confused with the current collector.
