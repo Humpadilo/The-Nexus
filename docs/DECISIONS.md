@@ -85,3 +85,19 @@ An unavailable or unknown entity is marked expected only when the available enti
 **Consequences:** Feature work may be slower, and ideas may be deferred. The project gains clearer failure modes and lower maintenance cost.
 
 **Alternatives considered:** Optimize for maximum feature count; rejected by project rules.
+
+## ADR-009 — Add a narrow semantic knowledge layer before Curator
+
+**Status:** Accepted for future implementation
+
+**Context:** Archivist stores raw Home Assistant observations and Watcher interprets selected fields directly. Curator is expected to organize the same information. If each higher-level module interprets entity identity, registry relationships, capabilities, availability, or expectedness independently, the project will accumulate duplicate rules and inconsistent results.
+
+**Decision:** Introduce a deterministic semantic knowledge layer before Curator. It will translate raw snapshots into versioned canonical facts and relationships, preserve provenance and confidence, and remain read-only. Raw snapshots and observations remain the source of truth. The layer will be local and persistence-compatible with the existing SQLite model.
+
+The Semantic Knowledge Foundation must be rebuildable entirely from Home Assistant state and configuration and must never become an independent source of truth.
+
+**Boundaries:** The layer is not a general-purpose knowledge graph, AI reasoning service, intent engine, notification system, or repair path. It must not invent unsupported facts, hide missing registry data, or sever evidence links. Watcher may adopt the canonical facts after compatibility tests; Curator must consume the shared contracts rather than create a competing interpretation.
+
+**Consequences:** A small amount of schema and contract work occurs before Curator, but entity/device/area semantics become reusable and testable. The project gains an explicit place for normalization and provenance while avoiding premature graph infrastructure. Sprint ordering becomes Archivist → Watcher → Semantic layer → Curator → Oracle.
+
+**Alternatives considered:** Put normalization directly in Curator; rejected because Watcher and future modules would continue to duplicate interpretation rules. Introduce a full knowledge graph; rejected as disproportionate to the current local, snapshot-based scope.

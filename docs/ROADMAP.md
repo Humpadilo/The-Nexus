@@ -38,24 +38,50 @@ Detect meaningful changes and recurring health conditions without changing Home 
 
 Users can see what changed and why it was reported, with no automatic repair.
 
-## v0.3 — Snapshot System
+## v0.3 — Semantic Knowledge Foundation
 
 ### Goals
 
-Make snapshots a first-class, navigable history.
+Introduce a small, deterministic semantic boundary between raw snapshots and higher-level modules so the project has one reusable interpretation of Home Assistant entities, devices, areas, capabilities, health states, and provenance.
 
 ### Expected features
 
-- Snapshot history.
-- Comparison between snapshots.
-- Retention and export policy.
-- Clear snapshot provenance.
+- Canonical local models for entities, devices, areas, capabilities, and health-relevant states.
+- Stable identity and relationship rules with explicit handling for missing or changing registry data.
+- Provenance from every canonical fact back to snapshot and observation evidence.
+- Confidence and expectedness metadata without AI inference.
+- Versioned contracts, migration behavior, fixtures, and read-only exports.
+- Compatibility with existing raw snapshot and Watcher records.
+
+### Non-goals
+
+- General-purpose knowledge graph infrastructure.
+- AI reasoning, recommendations, notifications, or repair.
+- Replacing raw snapshots as the source of truth.
+- Writing Home Assistant state or configuration.
 
 ### Success criteria
 
-Users can compare two snapshots and reproduce the summary from stored data.
+Watcher and future Curator code can consume the same tested canonical facts, every fact remains traceable to stored observations, and missing registry data degrades predictably without blocking snapshots.
 
-## v0.4 — Health Reports
+## v0.4 — Curator
+
+### Goals
+
+Organize canonical semantic facts into useful local views without duplicating Home Assistant interpretation rules.
+
+### Expected features
+
+- Entity, device, and area organization.
+- Human-readable relationships, capabilities, and health context.
+- Filters and views built from semantic contracts.
+- Clear provenance from displayed information to canonical facts and raw snapshots.
+
+### Success criteria
+
+Users can navigate a coherent representation of their Home Assistant system and trace important information back to collected evidence.
+
+## v0.5 — Health Reports
 
 ### Goals
 
@@ -72,7 +98,7 @@ Turn observations into clear maintenance reports.
 
 Reports explain findings without requiring the user to inspect raw JSON.
 
-## v0.5 — AI Recommendations
+## v0.6 — AI Recommendations
 
 ### Goals
 
@@ -89,7 +115,7 @@ Introduce optional explanation and recommendation assistance.
 
 Recommendations are optional, explainable, and never silently applied.
 
-## v0.6 — YAML Generation
+## v0.7 — YAML Generation
 
 ### Goals
 
@@ -105,7 +131,7 @@ Generate proposed Home Assistant configuration changes as reviewable artifacts.
 
 Users can inspect and reject generated changes without affecting production.
 
-## v0.7 — Simulation
+## v0.8 — Simulation
 
 ### Goals
 
@@ -121,7 +147,7 @@ Test proposed changes before applying them.
 
 The system can show expected effects and known risks before approval.
 
-## v0.8 — Approval Workflow
+## v0.9 — Approval Workflow
 
 ### Goals
 
@@ -138,7 +164,7 @@ Formalize human approval for changes.
 
 No production change can occur without a visible, recorded approval.
 
-## v0.9 — Activity Intelligence
+## v0.10 — Activity Intelligence
 
 ### Goals
 

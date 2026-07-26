@@ -40,9 +40,13 @@ Implemented foundation module. Collects read-only state and registry observation
 
 Implemented in Version 0.2. Compares persisted snapshots, stores evidence-backed findings, and reports new, ongoing, and resolved conditions without changing Home Assistant.
 
+### Semantic layer — Knowledge foundation
+
+Implemented in Version 0.3. Translates raw Archivist observations into deterministic canonical facts with stable identity, relationships, provenance, confidence, and dashboard-oriented grouping fields. It is rebuildable from stored snapshot data and is not a replacement for SQLite snapshots, an AI reasoning system, or a write path to Home Assistant.
+
 ### Curator — Organizer
 
-Planned module. Organizes, normalizes, and presents collected information.
+Planned Version 0.4 module. Organizes and presents canonical semantic facts instead of creating competing interpretations of raw Home Assistant payloads.
 
 ### Oracle — Reasoning
 

@@ -102,6 +102,17 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
             headers={"Content-Disposition": f"attachment; filename=snapshot-{snapshot_id}.json"},
         )
 
+    @application.get("/semantic/{snapshot_id}.json")
+    async def semantic(snapshot_id: int) -> Response:
+        projection = current_database.get_semantic_projection(snapshot_id)
+        if projection is None:
+            return JSONResponse({"error": "Semantic projection not found"}, status_code=404)
+        return Response(
+            json.dumps(projection, indent=2),
+            media_type="application/json",
+            headers={"Content-Disposition": f"attachment; filename=semantic-{snapshot_id}.json"},
+        )
+
     @application.get("/watcher/findings")
     async def watcher_findings() -> JSONResponse:
         return JSONResponse({"findings": current_database.list_findings()})

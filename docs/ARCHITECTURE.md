@@ -14,6 +14,9 @@ flowchart LR
     COL --> API
     COL --> REP[Report summary]
     COL --> WATCH[Watcher comparison]
+    COL --> SEM[Semantic knowledge layer]
+    SEM --> CUR[Curator]
+    SEM --> WATCH
     COL --> DB[(SQLite in /data)]
     WATCH --> DB
     UI --> DB
@@ -34,6 +37,7 @@ Version 0.1.0 was verified on a live Home Assistant OS host. The production path
 | Derived counts and report summary | `reports.summary` |
 | Snapshot persistence | `storage.database` |
 | Change and health findings | `watcher.service` and `storage.database` |
+| Canonical semantic interpretation | `semantic.service` and `semantic.models`; raw snapshots remain authoritative |
 | Web presentation and manual action | FastAPI/templates/static assets |
 | App-owned persistence | `/data` inside the app |
 | Protected Home Assistant files | Never read by The Archivist |
@@ -66,7 +70,13 @@ Compares adjacent snapshots for meaningful entity, battery, and automation healt
 
 ### Planned: Curator
 
-Future organization and normalization subsystem for making collected information easier to understand. No implementation exists yet.
+Future organization and presentation subsystem. Curator consumes the semantic layer rather than independently interpreting raw Home Assistant payloads. No implementation exists yet.
+
+### Implemented: Semantic knowledge layer
+
+A deterministic, local translation boundary between raw Archivist snapshots and higher-level modules. It defines canonical representations for entities, devices, areas, capabilities, availability, health states, provenance, confidence, and dashboard-oriented grouping. It resolves stable identifiers and relationships from available registry data, but does not replace raw snapshots, modify Home Assistant, infer intent, or call AI services.
+
+The layer is intentionally narrower than a general-purpose knowledge graph. Its SQLite projection is versioned and replaceable; it is rebuilt from stored snapshot state and registries. Every fact carries provenance back to snapshot evidence. Watcher remains compatible with the raw snapshot path, while Curator will consume these canonical facts for organization and presentation.
 
 ### Future: Oracle
 
@@ -108,7 +118,7 @@ Future AI-assisted features may use external services only through explicit, doc
 The intended future flow is:
 
 ```text
-Archivist → Watcher → Curator → Oracle → approval gate → Steward → Laboratory/verification
+Archivist → Semantic layer → Watcher → Curator → Oracle → approval gate → Steward → Laboratory/verification
 ```
 
 This is a roadmap boundary, not an implemented runtime pipeline.

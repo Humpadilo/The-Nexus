@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0 - Unreleased
+
+- Added the rebuildable semantic knowledge projection for entities, devices, areas, capabilities, and health.
+- Added versioned semantic facts with stable identifiers, dashboard-oriented grouping fields, provenance, and confidence.
+- Added SQLite persistence, replacement-safe rebuilds, semantic audit data, and a read-only semantic JSON export.
+- Added semantic fixtures and tests for deterministic rebuilds, missing registries, provenance, persistence, collector integration, and exports.
+
 ## 0.2.0 - 2026-07-27
 
 - Added The Watcher for evidence-backed snapshot comparison.

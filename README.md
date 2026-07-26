@@ -4,11 +4,11 @@ The Archivist is a local Home Assistant app/add-on that creates read-only snapsh
 
 The long-term project documentation is maintained under [`docs/`](docs/README.md). Start with the [Nexus documentation overview](docs/README.md), then use the [architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md), [project rules](docs/PROJECT_RULES.md), and [decisions](docs/DECISIONS.md) for context.
 
-## Version 0.2 — The Watcher
+## Version 0.3 — Semantic Knowledge Foundation
 
-The Ingress page provides a manual **Run Snapshot** action, a health endpoint at `/health`, a summary of entity health, a Watcher view, and downloadable JSON audit and findings bundles. Watcher compares adjacent snapshots, records new, ongoing, and resolved findings with evidence, severity, confidence, and timestamps, and avoids duplicate rows for unchanged conditions.
+The Ingress page provides a manual **Run Snapshot** action, a health endpoint at `/health`, a summary of entity health, a Watcher view, and downloadable JSON audit, findings, and semantic projection bundles. The semantic layer derives versioned, canonical entity, device, area, capability, and health facts from each raw snapshot. Every fact carries provenance and confidence and is designed for the next sprint's rich visual dashboard.
 
-Watcher checks run daily by default. The Home Assistant app options `schedule_enabled`, `schedule_interval_hours`, and `finding_retention_days` control local scheduling and resolved-finding retention. All behavior remains read-only.
+Watcher checks run daily by default. The Home Assistant app options `schedule_enabled`, `schedule_interval_hours`, and `finding_retention_days` control local scheduling and resolved-finding retention. Semantic projections are rebuildable from stored Home Assistant state and registry data; raw snapshots remain authoritative. All behavior remains read-only.
 
 The foundation reserves these future module names: `Archivist`, `Watcher`, `Curator`, `Oracle`, and `Steward`. AI analysis and configuration repair are intentionally out of scope.
 
@@ -31,7 +31,7 @@ For local development, place the repository in Home Assistant's local app reposi
 
 The app definition enables Ingress on port 8099 and maps the add-on data directory. The Dockerfile uses an explicit Python 3.12 base image; the obsolete `build.yaml` file is no longer required by current Home Assistant app builds.
 
-Sprint 1 was verified live on Home Assistant OS and is tagged `v0.1.0-verified`. Version 0.2 adds Watcher comparison and scheduling; local tests cover transitions, expected classification, persistence, deduplication, recovery, and exports.
+Sprint 1 was verified live on Home Assistant OS and is tagged `v0.1.0-verified`. Version 0.2 adds Watcher comparison and scheduling. Version 0.3 adds the rebuildable semantic projection; local tests cover semantic contracts, provenance, persistence, deterministic rebuilds, and exports.
 
 ## Safety and permissions
 

@@ -2,7 +2,7 @@
 
 This file tracks current development. Completed sprints remain here as an historical record. Detailed future ideas belong in the roadmap or parking lot.
 
-## Current sprint — Sprint 2: The Watcher
+## Current sprint — Sprint 4: Curator
 
 ### Completed
 
@@ -63,7 +63,39 @@ Watcher compares stored snapshots, persists evidence-backed findings, exposes a 
 
 ### Next sprint
 
-- Define Curator requirements and normalization boundaries.
+- Define and implement the Semantic Knowledge Foundation.
+
+## Sprint 3 — Semantic Knowledge Foundation — complete
+
+Create the deterministic translation boundary between Archivist snapshots and higher-level modules.
+
+### Planned outcomes
+
+- Canonical, versioned models for entity, device, area, capability, availability, and health facts.
+- Stable identity and relationship rules that tolerate incomplete or changing registry data.
+- Evidence and confidence on every canonical fact, linked to snapshot observations.
+- Read-only persistence or derived views that do not replace raw snapshots.
+- Watcher compatibility tests proving existing findings remain reproducible.
+- Fixtures and migration tests for representative Home Assistant API variations.
+- Dashboard-oriented summaries, grouping, labels, relationships, and drill-down fields.
+
+### Explicit non-goals
+
+- Curator presentation features.
+- AI reasoning or recommendations.
+- YAML generation, repair, notifications, or Home Assistant writes.
+- A general-purpose graph database or hidden ontology.
+
+### Sprint 4 ordering
+
+Sprint 3 is complete locally. Sprint 4 will implement Curator as the organizer and presentation layer over the verified semantic contracts.
+
+### Sprint 3 verification
+
+- Version 0.3.0 semantic projection implemented.
+- Local suite: 13 tests passed.
+- Compilation and `git diff --check` passed.
+- Live Home Assistant installation remains the release verification step for Version 0.3.0.
 
 ## Completed sprint history
 

@@ -2,6 +2,7 @@ from pathlib import Path
 
 from archivist.storage.database import Database
 from archivist.storage.models import EntityObservation
+from archivist.semantic.service import SemanticBuilder
 from archivist.watcher.models import FindingCandidate
 from datetime import datetime, UTC
 
@@ -29,3 +30,22 @@ def test_findings_are_upserted_with_evidence_and_recovery(tmp_path: Path) -> Non
     resolved = FindingCandidate("entity_unavailable:light.one", "entity_unavailable", "light.one", "Recovered", "Recovered", "info", "high", False, "resolved", 2, datetime(2026, 7, 28, tzinfo=UTC), {"current_snapshot_id": 2})
     db.save_findings([resolved])
     assert db.list_findings()[0]["status"] == "resolved"
+
+
+def test_semantic_projection_round_trip_and_rebuild(tmp_path: Path) -> None:
+    db = Database(tmp_path / "test.db")
+    summary = {"total_entities": 1, "unavailable_entities": 0, "unknown_entities": 0, "disabled_or_unavailable_automations": 0, "low_battery_entities": 0}
+    snapshot_id = db.save_snapshot(summary, [EntityObservation("light.one", "on", {"friendly_name": "One"})], {"entities": [], "devices": [], "areas": []})
+    raw = db.get_snapshot(snapshot_id)
+    assert raw is not None
+    projection = SemanticBuilder().build(raw)
+    db.save_semantic_projection(projection)
+
+    stored = db.get_semantic_projection(snapshot_id)
+    assert stored is not None
+    assert stored["schema_version"] == 1
+    assert stored["summary"]["entity_count"] == 1
+    assert stored["facts"][0]["provenance"]["snapshot_id"] == snapshot_id
+
+    db.save_semantic_projection(projection)
+    assert len(db.get_semantic_projection(snapshot_id)["facts"]) == len(projection.facts)

@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from .models import EntityObservation, Snapshot
+from archivist.semantic.models import SemanticProjection
 from archivist.watcher.models import FindingCandidate
 
 
@@ -64,8 +65,26 @@ class Database:
                 );
                 CREATE INDEX IF NOT EXISTS idx_watcher_status ON watcher_findings(status);
                 CREATE INDEX IF NOT EXISTS idx_watcher_last_seen ON watcher_findings(last_seen);
+                CREATE TABLE IF NOT EXISTS semantic_projections (
+                    snapshot_id INTEGER PRIMARY KEY REFERENCES snapshots(id),
+                    schema_version INTEGER NOT NULL,
+                    generated_at TEXT NOT NULL,
+                    summary_json TEXT NOT NULL
+                );
+                CREATE TABLE IF NOT EXISTS semantic_facts (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    snapshot_id INTEGER NOT NULL REFERENCES snapshots(id),
+                    fact_type TEXT NOT NULL,
+                    subject_id TEXT NOT NULL,
+                    payload_json TEXT NOT NULL,
+                    provenance_json TEXT NOT NULL,
+                    confidence TEXT NOT NULL,
+                    UNIQUE(snapshot_id, fact_type, subject_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_semantic_fact_type ON semantic_facts(snapshot_id, fact_type);
+                CREATE INDEX IF NOT EXISTS idx_semantic_subject ON semantic_facts(subject_id);
             """)
-            conn.execute("PRAGMA user_version = 2")
+            conn.execute("PRAGMA user_version = 3")
 
     def save_snapshot(self, summary: dict[str, int], observations: list[EntityObservation], registries: dict[str, Any]) -> int:
         captured_at = datetime.now(UTC).isoformat()
@@ -99,13 +118,45 @@ class Database:
                 "SELECT * FROM watcher_findings WHERE first_snapshot_id <= ? ORDER BY status, severity DESC, last_seen DESC",
                 (snapshot_id,),
             ).fetchall()
+            semantic = self._semantic_projection(conn, snapshot_id)
         return {
             "id": row["id"], "captured_at": row["captured_at"],
             "summary": {key: row[key] for key in ("total_entities", "unavailable_entities", "unknown_entities", "disabled_or_unavailable_automations", "low_battery_entities")},
             "registries": json.loads(row["registries_json"]),
             "entities": [{"entity_id": item["entity_id"], "state": item["state"], "attributes": json.loads(item["attributes_json"])} for item in observations],
             "watcher_findings": [self._finding_dict(item) for item in findings],
+            "semantic": semantic,
         }
+
+    def save_semantic_projection(self, projection: SemanticProjection) -> None:
+        """Replace one snapshot's derived projection atomically."""
+        with self._connect() as conn:
+            conn.execute("DELETE FROM semantic_facts WHERE snapshot_id = ?", (projection.snapshot_id,))
+            conn.execute("DELETE FROM semantic_projections WHERE snapshot_id = ?", (projection.snapshot_id,))
+            conn.execute(
+                "INSERT INTO semantic_projections (snapshot_id, schema_version, generated_at, summary_json) VALUES (?, ?, ?, ?)",
+                (projection.snapshot_id, projection.schema_version, projection.generated_at.isoformat(), json.dumps(projection.summary)),
+            )
+            conn.executemany(
+                """INSERT INTO semantic_facts
+                (snapshot_id, fact_type, subject_id, payload_json, provenance_json, confidence)
+                VALUES (?, ?, ?, ?, ?, ?)""",
+                [
+                    (
+                        projection.snapshot_id,
+                        fact.fact_type,
+                        fact.subject_id,
+                        json.dumps(fact.payload),
+                        json.dumps(fact.provenance),
+                        fact.confidence,
+                    )
+                    for fact in projection.facts
+                ],
+            )
+
+    def get_semantic_projection(self, snapshot_id: int) -> dict[str, Any] | None:
+        with self._connect() as conn:
+            return self._semantic_projection(conn, snapshot_id)
 
     def latest_snapshot(self) -> Snapshot | None:
         with self._connect() as conn:
@@ -182,4 +233,33 @@ class Database:
             "resolved_at": row["resolved_at"], "occurrence_count": row["occurrence_count"],
             "first_snapshot_id": row["first_snapshot_id"], "last_snapshot_id": row["last_snapshot_id"],
             "evidence": json.loads(row["evidence_json"]),
+        }
+
+    @staticmethod
+    def _semantic_projection(conn: sqlite3.Connection, snapshot_id: int) -> dict[str, Any] | None:
+        projection = conn.execute(
+            "SELECT * FROM semantic_projections WHERE snapshot_id = ?", (snapshot_id,)
+        ).fetchone()
+        if projection is None:
+            return None
+        facts = conn.execute(
+            """SELECT fact_type, subject_id, payload_json, provenance_json, confidence
+            FROM semantic_facts WHERE snapshot_id = ? ORDER BY fact_type, subject_id""",
+            (snapshot_id,),
+        ).fetchall()
+        return {
+            "schema_version": projection["schema_version"],
+            "snapshot_id": projection["snapshot_id"],
+            "generated_at": projection["generated_at"],
+            "summary": json.loads(projection["summary_json"]),
+            "facts": [
+                {
+                    "fact_type": fact["fact_type"],
+                    "subject_id": fact["subject_id"],
+                    "payload": json.loads(fact["payload_json"]),
+                    "provenance": json.loads(fact["provenance_json"]),
+                    "confidence": fact["confidence"],
+                }
+                for fact in facts
+            ],
         }

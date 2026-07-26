@@ -103,6 +103,66 @@ As a Home Assistant owner, I want to press one button to capture the current hea
 - Unit-test collection with a fake Home Assistant client.
 - Perform a manual Home Assistant OS installation test before release.
 
+## Feature: Semantic Knowledge Foundation (Version 0.3)
+
+### Goal
+
+Provide one deterministic, rebuildable semantic projection over raw Archivist snapshots so Watcher and Curator can share canonical facts without creating a second source of truth.
+
+### User story
+
+As a Home Assistant owner, I want collected entities, devices, areas, capabilities, and health states represented consistently so that the next dashboard can present my system clearly and trace every displayed fact back to its source.
+
+### Requirements
+
+- Derive semantic facts entirely from the stored snapshot's Home Assistant state and registry payloads.
+- Keep raw snapshots and observations authoritative; semantic data must be replaceable and rebuildable.
+- Provide versioned canonical facts for entities, devices, areas, capabilities, and health.
+- Provide stable subject identifiers, display labels, domain/grouping fields, relationships, availability, expectedness, and health state.
+- Attach snapshot and source evidence plus confidence to every fact.
+- Provide summary counts and domain/availability/health groupings suitable for dashboard cards, filters, and drill-down views.
+- Persist the projection locally in SQLite and expose a read-only machine-readable export.
+- Preserve compatibility with existing Watcher findings and audit bundles.
+- Degrade predictably when registry data is unavailable.
+
+### Non-goals
+
+- Curator UI or the rich visual dashboard itself.
+- A general-purpose graph database or hidden ontology.
+- AI inference, recommendations, notifications, repair, or Home Assistant writes.
+- Replacing raw snapshots with semantic data.
+
+### Dependencies
+
+- Archivist snapshots and entity observations.
+- Best-effort Home Assistant entity, device, and area registry payloads.
+- SQLite schema migration from Version 0.2.
+
+### Risks
+
+- Home Assistant registry fields vary by version and integration.
+- Overly broad capability inference could create misleading dashboard data.
+- Derived data can drift if it is not rebuilt transactionally from raw snapshots.
+
+### Acceptance criteria
+
+- A stored snapshot can produce a versioned semantic projection without contacting Home Assistant again.
+- Rebuilding the same snapshot produces identical facts, summaries, identifiers, relationships, provenance, and confidence.
+- Every fact links to its snapshot and source observation or registry entry.
+- Missing registry data does not prevent entity and health facts from being generated.
+- The projection provides stable fields for dashboard grouping, filtering, summary cards, and entity/device/area drill-downs.
+- Replacing a projection never changes the raw snapshot or Watcher findings.
+- A semantic JSON export is available for a stored snapshot.
+- Tests cover canonical models, dashboard-oriented fields, missing registries, persistence, rebuilds, collector integration, and export behavior.
+
+### Test strategy
+
+- Use fixture snapshots representing complete and incomplete registry responses.
+- Compare repeated builds for deterministic semantic output.
+- Round-trip projections through SQLite and replace them to verify rebuild safety.
+- Verify the collector stores semantic data without changing raw summaries or findings.
+- Verify the read-only semantic export and provenance fields.
+
 ## Feature: Watcher snapshot comparison (Version 0.2)
 
 ### Goal

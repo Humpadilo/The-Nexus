@@ -14,6 +14,8 @@ Watcher begins from this persisted snapshot model. It remains read-only and loca
 
 The Nexus is the long-term system direction. The Archivist is the implemented Version 0.1 subsystem. The name separation prevents future modules from being confused with the current collector.
 
+Version 0.3 adds the implemented Semantic Knowledge Foundation. It is a rebuildable projection of stored Home Assistant state and registry data, not an independent source of truth. Its dashboard-oriented facts provide stable labels, relationships, grouping, health, provenance, and confidence for the future Curator UI.
+
 ## Local-first assumption
 
 The Archivist runs as a Home Assistant app and continues operating without Codex or ChatGPT. This preserves local control and makes collection and reporting available even when development tools or cloud services are unavailable.

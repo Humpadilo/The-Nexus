@@ -18,6 +18,15 @@ This documentation changelog follows [Keep a Changelog](https://keepachangelog.c
 - Completed two live snapshots; the second contained 438 entities, 20 unavailable, 122 unknown, and 143 persisted findings.
 - Downloaded and validated the audit bundle and findings export.
 
+## [0.3.0] - Unreleased
+
+### Added
+
+- Rebuildable semantic knowledge projections derived from raw snapshots.
+- Canonical entity, device, area, capability, and health facts with provenance and confidence.
+- Dashboard-oriented summaries, grouping fields, relationships, and semantic JSON exports.
+- SQLite schema migration and tests for deterministic replacement-safe projections.
+
 ## [0.1.0] - 2026-07-26
 
 ### Added

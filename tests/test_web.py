@@ -54,3 +54,7 @@ def test_snapshot_and_audit_download(tmp_path: Path, monkeypatch) -> None:
     assert download.json()["entities"][0]["entity_id"] == "light.unavailable"
     assert client.get("/watcher/findings").status_code == 200
     assert client.get("/watcher/findings.json").headers["content-disposition"] == "attachment; filename=watcher-findings.json"
+    semantic_download = client.get(f"/semantic/{snapshot_id}.json")
+    assert semantic_download.status_code == 200
+    assert semantic_download.headers["content-disposition"] == f"attachment; filename=semantic-{snapshot_id}.json"
+    assert semantic_download.json()["summary"]["entity_count"] == 2
