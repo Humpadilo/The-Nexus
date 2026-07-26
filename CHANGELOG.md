@@ -6,6 +6,9 @@
 - Improved responsive layout, typography, contrast, keyboard focus, reduced-motion behavior, empty states, report cards, timeline storytelling, and interaction feedback.
 - Added future module affordances for Curator, Planner, Engineer, and Oracle without implementing their workflows.
 - Added dashboard experience assertions and preserved the read-only backend boundary.
+- Verified on Home Assistant OS: Version 0.4.5 installed and running, Ingress loaded, the new experience rendered, and a live snapshot collected 437 entities, 60 devices, and 8 areas.
+- Downloaded and validated the live audit bundle with 1,379 semantic facts and fact provenance.
+- Release verification tag: `v0.4.5-verified`.
 
 ## 0.4.0 - 2026-07-26
 

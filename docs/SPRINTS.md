@@ -132,7 +132,12 @@ Sprint 3 is complete and verified. Sprint 4 implements The Nexus Dashboard as th
 
 ### Sprint 4.5 verification
 
-- Version 0.4.5 is the Sprint 4.5 release candidate pending live Home Assistant verification.
+- Version 0.4.5 installed and started successfully on Home Assistant OS.
+- Ingress loaded the module-oriented Nexus Experience.
+- Manual live snapshot collected 437 entities, 60 devices, and 8 areas.
+- Audit bundle downloaded and parsed successfully with 1,379 semantic facts and provenance.
+- Local suite: 14 tests passed.
+- Release verification tag: `v0.4.5-verified`.
 - Backend modules remain unchanged in ownership and behavior.
 - Sprint 5 Curator has not begun.
 

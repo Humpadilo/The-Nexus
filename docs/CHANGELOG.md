@@ -15,6 +15,14 @@ This documentation changelog follows [Keep a Changelog](https://keepachangelog.c
 - No Archivist, Watcher, Semantic Foundation, or Home Assistant behavior was redesigned.
 - Curator, Planner, Engineer, and Oracle remain unavailable future modules.
 
+### Live verification
+
+- Version 0.4.5 installed and started successfully on Home Assistant OS.
+- Ingress loaded the module-oriented Nexus Experience.
+- Manual live snapshot collected 437 entities, 60 devices, and 8 areas.
+- Audit bundle downloaded and parsed successfully with 1,379 semantic facts and provenance.
+- Local suite: 14 tests passed; release verification tag: `v0.4.5-verified`.
+
 ## [0.2.0] - 2026-07-27
 
 ### Added
