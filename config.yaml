@@ -1,0 +1,26 @@
+name: The Archivist
+version: "0.1.0"
+slug: the_archivist
+description: Read-only local snapshots and audits of a Home Assistant instance.
+url: https://github.com/example/the-archivist
+arch:
+  - amd64
+  - aarch64
+  - armv7
+  - armhf
+  - i386
+startup: application
+boot: auto
+init: false
+ingress: true
+ingress_port: 8099
+panel_icon: mdi:archive-search
+map:
+  - type: data
+    read_only: false
+options: {}
+schema: {}
+ports:
+  8099/tcp: null
+ports_description:
+  8099/tcp: Internal web service (Ingress recommended)
