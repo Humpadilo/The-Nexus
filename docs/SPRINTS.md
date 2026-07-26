@@ -114,7 +114,11 @@ Sprint 3 is complete and verified. Sprint 4 implements The Nexus Dashboard as th
 
 - Local suite: 14 tests passed.
 - Dashboard remains read-only and operates entirely from local SQLite semantic and Watcher data.
-- Version 0.4.0 is the release candidate for live Home Assistant verification.
+- Version 0.4.0 installed and started successfully on Home Assistant OS.
+- Ingress loaded and rendered the dashboard from live SQLite data.
+- Manual snapshot collected 436 entities, 59 devices, and 8 areas.
+- Audit bundle downloaded and parsed successfully with 1,375 semantic facts and provenance.
+- Release verification tag: `v0.4.0-verified`.
 
 ## Completed sprint history
 

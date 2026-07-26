@@ -18,12 +18,20 @@ This documentation changelog follows [Keep a Changelog](https://keepachangelog.c
 - Completed two live snapshots; the second contained 438 entities, 20 unavailable, 122 unknown, and 143 persisted findings.
 - Downloaded and validated the audit bundle and findings export.
 
-## [0.4.0] - Unreleased
+## [0.4.0] - 2026-07-26
 
 ### Added
 
 - The Nexus Dashboard with overview, health, semantic explorer, timeline, and reports sections.
 - Dashboard projections and tests over existing semantic and Watcher data.
+
+### Live verification
+
+- Installed and started Version 0.4.0 on Home Assistant OS; Ingress loaded successfully.
+- Manual live snapshot collected 436 entities, 59 devices, and 8 areas.
+- Dashboard rendered semantic areas, devices, capabilities, entities, timeline, and report links.
+- Downloaded audit bundle parsed successfully with 1,375 semantic facts and provenance.
+- Local suite: 14 tests passed; release verification tag: `v0.4.0-verified`.
 
 ## [0.3.0] - 2026-07-26
 

@@ -86,6 +86,8 @@ The layer is intentionally narrower than a general-purpose knowledge graph. Its 
 
 The read-only dashboard is the first presentation consumer of the semantic layer. It provides overview metrics, Watcher health groups, area/device/capability/entity exploration, snapshot timeline, and downloadable reports. It contains no Home Assistant write path and does not become a source of truth.
 
+Version 0.4.0 was verified on Home Assistant OS with the dashboard rendering from local SQLite semantic and Watcher data after a live snapshot of 436 entities, 59 devices, and 8 areas. The verified release is tagged `v0.4.0-verified`.
+
 ### Future: Oracle
 
 Future reasoning and recommendation subsystem. It must not silently change production.

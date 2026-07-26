@@ -31,7 +31,7 @@ For local development, place the repository in Home Assistant's local app reposi
 
 The app definition enables Ingress on port 8099 and maps the add-on data directory. The Dockerfile uses an explicit Python 3.12 base image; the obsolete `build.yaml` file is no longer required by current Home Assistant app builds.
 
-Sprint 1 was verified live on Home Assistant OS and is tagged `v0.1.0-verified`. Version 0.2 adds Watcher comparison and scheduling. Version 0.3 adds the rebuildable semantic projection and is tagged `v0.3.0-verified`. Version 0.4 adds The Nexus Dashboard.
+Sprint 1 was verified live on Home Assistant OS and is tagged `v0.1.0-verified`. Version 0.2 adds Watcher comparison and scheduling. Version 0.3 adds the rebuildable semantic projection and is tagged `v0.3.0-verified`. Version 0.4 adds The Nexus Dashboard and is verified on Home Assistant OS with tag `v0.4.0-verified`.
 
 ## Safety and permissions
 

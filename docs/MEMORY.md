@@ -16,7 +16,7 @@ The Nexus is the long-term system direction. The Archivist is the implemented Ve
 
 Version 0.3 adds the implemented Semantic Knowledge Foundation. It is a rebuildable projection of stored Home Assistant state and registry data, not an independent source of truth. Its dashboard-oriented facts provide stable labels, relationships, grouping, health, provenance, and confidence for the future Curator UI.
 
-Version 0.4 adds The Nexus Dashboard as a read-only consumer of semantic facts and Watcher findings. Live Version 0.3 verification produced snapshot 4 with 437 entities, 20 unavailable, 120 unknown, 1,379 semantic facts, 60 devices, and 8 areas.
+Version 0.4 adds The Nexus Dashboard as a read-only consumer of semantic facts and Watcher findings. Live Version 0.3 verification produced snapshot 4 with 437 entities, 20 unavailable, 120 unknown, 1,379 semantic facts, 60 devices, and 8 areas. Version 0.4.0 was then verified on Home Assistant OS: Ingress loaded, the dashboard rendered live semantic data, a manual snapshot collected 436 entities, 59 devices, and 8 areas, and its audit bundle parsed with 1,375 facts and provenance. The release is tagged `v0.4.0-verified`.
 
 ## Local-first assumption
 

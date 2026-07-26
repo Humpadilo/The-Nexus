@@ -1,11 +1,14 @@
 # Changelog
 
-## 0.4.0 - Unreleased
+## 0.4.0 - 2026-07-26
 
 - Added The Nexus Dashboard with Overview, Health, semantic Explorer, Timeline, and Reports sections.
 - Added read-only dashboard projections over semantic facts and Watcher findings.
 - Added dashboard navigation, responsive styling, semantic drill-down tables, and report links.
 - Added dashboard service and web regression tests.
+- Verified on Home Assistant OS: Version 0.4.0 installed and running, Ingress loaded, and a live manual snapshot collected 436 entities, 59 devices, and 8 areas.
+- Verified the dashboard displayed semantic data and report links; the downloaded audit bundle parsed successfully with 1,375 semantic facts and provenance.
+- Release verification tag: `v0.4.0-verified`.
 
 ## 0.3.0 - 2026-07-26
 
