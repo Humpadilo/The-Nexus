@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.5 - 2026-07-26
+
+- Added The Nexus Experience presentation layer with scalable module navigation, progressive disclosure, calmer overview language, and clearer health context.
+- Improved responsive layout, typography, contrast, keyboard focus, reduced-motion behavior, empty states, report cards, timeline storytelling, and interaction feedback.
+- Added future module affordances for Curator, Planner, Engineer, and Oracle without implementing their workflows.
+- Added dashboard experience assertions and preserved the read-only backend boundary.
+
 ## 0.4.0 - 2026-07-26
 
 - Added The Nexus Dashboard with Overview, Health, semantic Explorer, Timeline, and Reports sections.

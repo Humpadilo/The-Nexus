@@ -88,6 +88,28 @@ The read-only dashboard is the first presentation consumer of the semantic layer
 
 Version 0.4.0 was verified on Home Assistant OS with the dashboard rendering from local SQLite semantic and Watcher data after a live snapshot of 436 entities, 59 devices, and 8 areas. The verified release is tagged `v0.4.0-verified`.
 
+### UX architecture review after Sprint 4
+
+The Version 0.4 dashboard is an effective first presentation surface, but its current information architecture is intentionally small: one document, five anchor-linked sections, and bounded lists for areas, devices, capabilities, entities, findings, history, and reports. The sticky section navigation, clear overview metrics, severity grouping, semantic explorer grouping, and explicit report links provide a good Sprint 4 baseline.
+
+The review identified four scaling constraints:
+
+- Navigation is section-based rather than module-based. Adding Curator, Planner, Engineer, or Oracle as more anchors would make the page longer and weaken the distinction between observing, organizing, planning, executing, and reasoning.
+- Information density is acceptable for a first snapshot, but fixed display limits and a single-page explorer will not support large collections, deep relationships, or workflow history without scoped views and progressive disclosure.
+- Discoverability currently depends on the Overview-to-section scan. Future modules need stable entry points, contextual links, and consistent breadcrumbs or back navigation so users can move from a finding to its area, device, entity, evidence, and—where applicable—an ensuing workflow.
+- The current visual hierarchy is strong at the page and section level, but future modules will need a shared shell and vocabulary for status, severity, confidence, evidence, ownership, and lifecycle state. Otherwise each module could invent competing meanings for the same concepts.
+
+The dashboard architecture can support the future Nexus modules if the presentation layer evolves into a shared application shell rather than continuing to grow as one page. The recommended direction is:
+
+1. Keep Overview as the landing page and preserve the current read-only dashboard as the observation layer.
+2. Introduce module-level navigation for Archivist, Watcher, Curator, Planner, Engineer, and Oracle; expose only modules that are implemented and available.
+3. Give each module scoped pages or views, while retaining shared entity, area, device, finding, evidence, and timeline links.
+4. Use progressive disclosure for large collections: summaries first, then filters, pagination or search, and detail views. Do not solve scale by silently increasing hard-coded list limits.
+5. Treat evidence and provenance as cross-cutting UI primitives. Every derived item should be able to link back to the snapshot or finding that supports it.
+6. Keep lifecycle and authority boundaries visible: Archivist and Watcher observe, Curator organizes, Planner proposes, Engineer implements only with explicit future authorization, and Oracle reasons. No module should imply that a recommendation or plan has changed Home Assistant.
+
+Sprint 4.5 implements the presentation-only first step of this recommendation: a shared visual shell, module affordances, clearer context, progressive disclosure, and accessibility foundations. No backend ownership, semantic contracts, read-only boundaries, or completed dashboard behavior are changed.
+
 ### Future: Oracle
 
 Future reasoning and recommendation subsystem. It must not silently change production.

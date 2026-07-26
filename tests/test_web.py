@@ -32,6 +32,9 @@ def test_health_and_ingress_page(tmp_path: Path) -> None:
     assert "The Archivist" in page.text
     assert "The Nexus" in page.text
     assert "Semantic map" in page.text
+    assert "Understand your home." in page.text
+    assert "Curator" in page.text
+    assert "The House Dreams Peacefully" in page.text
     assert client.get("/static/styles.css").status_code == 200
 
 

@@ -2,6 +2,19 @@
 
 This documentation changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The root [CHANGELOG.md](../CHANGELOG.md) remains the release-facing project history.
 
+## [0.4.5] - 2026-07-26
+
+### Added
+
+- The Nexus Experience presentation refinement between the Dashboard and Curator sprints.
+- Module-oriented navigation affordances for current and future Nexus capabilities.
+- Contextual overview health language, progressive disclosure, a story-oriented timeline, responsive layout, accessibility improvements, and restrained micro-interactions.
+
+### Scope
+
+- No Archivist, Watcher, Semantic Foundation, or Home Assistant behavior was redesigned.
+- Curator, Planner, Engineer, and Oracle remain unavailable future modules.
+
 ## [0.2.0] - 2026-07-27
 
 ### Added

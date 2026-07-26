@@ -81,6 +81,30 @@ Organize canonical semantic facts into useful local views without duplicating Ho
 
 Users can navigate a coherent representation of their Home Assistant system and trace important information back to collected evidence.
 
+## v0.4.5 — The Nexus Experience
+
+### Goals
+
+Refine the presentation layer into a calm, scalable application experience before adding the Curator workflow.
+
+### Expected features
+
+- Module-oriented navigation affordances for current and future Nexus modules.
+- Contextual Overview health language and progressive disclosure.
+- Explorer navigation that emphasizes areas, devices, capabilities, relationships, health, and history.
+- Story-oriented timeline presentation.
+- Consistent responsive styling, accessibility foundations, empty states, and restrained interaction feedback.
+
+### Non-goals
+
+- Redesigning Archivist, Watcher, or the Semantic Knowledge Foundation.
+- Implementing Curator, Planner, Engineer, or Oracle workflows.
+- AI reasoning, recommendations, Home Assistant writes, or backend data-model changes.
+
+### Success criteria
+
+The Nexus feels like a coherent local application, navigation can grow into future modules without becoming a longer tab strip, and existing semantic and Watcher data remains read-only and traceable.
+
 ## v0.5 — Curator
 
 ### Goals

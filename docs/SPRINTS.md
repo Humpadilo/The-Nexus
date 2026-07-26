@@ -2,7 +2,7 @@
 
 This file tracks current development. Completed sprints remain here as an historical record. Detailed future ideas belong in the roadmap or parking lot.
 
-## Current sprint — Sprint 5: Curator
+## Current sprint — Sprint 4.5: The Nexus Experience — complete
 
 ### Completed
 
@@ -119,6 +119,26 @@ Sprint 3 is complete and verified. Sprint 4 implements The Nexus Dashboard as th
 - Manual snapshot collected 436 entities, 59 devices, and 8 areas.
 - Audit bundle downloaded and parsed successfully with 1,375 semantic facts and provenance.
 - Release verification tag: `v0.4.0-verified`.
+
+## Sprint 4.5 — The Nexus Experience — complete
+
+- [x] Transition the dashboard toward a module-oriented application shell.
+- [x] Improve Overview context so health, change, and attention are immediately understandable.
+- [x] Improve Explorer and Timeline presentation without changing semantic or Watcher contracts.
+- [x] Establish responsive layout, typography, contrast, keyboard focus, reduced-motion behavior, empty states, and restrained micro-interactions.
+- [x] Add future-module affordances for Curator, Planner, Engineer, and Oracle without implementing their workflows.
+- [x] Add presentation assertions and preserve read-only behavior.
+- [x] Verify the experience through Home Assistant Ingress.
+
+### Sprint 4.5 verification
+
+- Version 0.4.5 is the Sprint 4.5 release candidate pending live Home Assistant verification.
+- Backend modules remain unchanged in ownership and behavior.
+- Sprint 5 Curator has not begun.
+
+### Next sprint
+
+- Sprint 5: Curator.
 
 ## Completed sprint history
 

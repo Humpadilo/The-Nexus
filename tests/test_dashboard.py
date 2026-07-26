@@ -18,7 +18,10 @@ def test_dashboard_groups_semantic_facts_and_finding_health() -> None:
     finding = {"status": "active", "severity": "warning", "title": "Unavailable", "last_seen": "now"}
     result = DashboardBuilder().build(latest, [Snapshot(7, datetime.now(UTC), 1, 0, 0, 0, 0)], [finding])
     assert result["overview"]["health"] == "attention"
+    assert result["overview"]["health_label"] == "The House Dreams Restlessly"
+    assert result["overview"]["health_message"] == "1 active finding to review"
     assert result["overview"]["areas"] == 1
     assert result["health"]["counts"] == {"warning": 1}
     assert result["explorer"]["entities"][0]["display_name"] == "Lamp"
     assert result["timeline"][0]["id"] == 7
+    assert result["timeline"][0]["headline"] == "House state captured"

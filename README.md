@@ -4,13 +4,13 @@ The Archivist is a local Home Assistant app/add-on that creates read-only snapsh
 
 The long-term project documentation is maintained under [`docs/`](docs/README.md). Start with the [Nexus documentation overview](docs/README.md), then use the [architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md), [project rules](docs/PROJECT_RULES.md), and [decisions](docs/DECISIONS.md) for context.
 
-## Version 0.4 — The Nexus Dashboard
+## Version 0.4.5 — The Nexus Experience
 
-The Ingress page provides a polished read-only dashboard with Overview, Health, Explorer, Timeline, and Reports sections. It provides a manual **Run Snapshot** action, a health endpoint at `/health`, and downloadable JSON audit, findings, and semantic projection bundles. The dashboard uses versioned semantic entity, device, area, capability, and health facts plus Watcher findings; it does not add AI reasoning or Home Assistant writes.
+The Ingress page provides a polished read-only application experience with module-oriented navigation, contextual Overview health, Watcher findings, semantic Explorer, a story-oriented Timeline, and Reports. It provides a manual **Run Snapshot** action, a health endpoint at `/health`, and downloadable JSON audit, findings, and semantic projection bundles. The presentation layer uses versioned semantic facts plus Watcher findings; it does not add AI reasoning or Home Assistant writes.
 
 Watcher checks run daily by default. The Home Assistant app options `schedule_enabled`, `schedule_interval_hours`, and `finding_retention_days` control local scheduling and resolved-finding retention. Semantic projections are rebuildable from stored Home Assistant state and registry data; raw snapshots remain authoritative. All behavior remains read-only.
 
-The foundation reserves these future module names: `Archivist`, `Watcher`, `Curator`, `Oracle`, and `Steward`. AI analysis and configuration repair are intentionally out of scope.
+The foundation reserves these future module names: `Archivist`, `Watcher`, `Curator`, `Planner`, `Engineer`, and `Oracle`. AI analysis and configuration repair are intentionally out of scope.
 
 ## Home Assistant OS installation
 
