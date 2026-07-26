@@ -38,7 +38,7 @@ Implemented foundation module. Collects read-only state and registry observation
 
 ### Watcher — Monitor
 
-Planned module. Detects changes, recurring conditions, and events according to explicit rules.
+Implemented in Version 0.2. Compares persisted snapshots, stores evidence-backed findings, and reports new, ongoing, and resolved conditions without changing Home Assistant.
 
 ### Curator — Organizer
 

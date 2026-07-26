@@ -13,12 +13,14 @@ flowchart LR
     UI --> COL[Collector]
     COL --> API
     COL --> REP[Report summary]
+    COL --> WATCH[Watcher comparison]
     COL --> DB[(SQLite in /data)]
+    WATCH --> DB
     UI --> DB
     DB --> JSON[JSON audit bundle]
 ```
 
-The container starts `python -m archivist.main` through `rootfs/usr/local/bin/archivist`. FastAPI serves the Ingress page on port 8099. The collector performs read-only collection and writes snapshots and observations to SQLite.
+The container starts `python -m archivist.main` through `rootfs/usr/local/bin/archivist`. FastAPI serves the Ingress page on port 8099. The collector performs read-only collection and writes snapshots, observations, and Watcher findings to SQLite. Manual and scheduled checks share this path.
 
 Version 0.1.0 was verified on a live Home Assistant OS host. The production path installed and started the app, served Ingress, collected 436 entities, persisted the result in SQLite, and generated a validated JSON audit bundle. The verified baseline is tagged `v0.1.0`.
 
@@ -31,6 +33,7 @@ Version 0.1.0 was verified on a live Home Assistant OS host. The production path
 | Snapshot orchestration | `Collector` |
 | Derived counts and report summary | `reports.summary` |
 | Snapshot persistence | `storage.database` |
+| Change and health findings | `watcher.service` and `storage.database` |
 | Web presentation and manual action | FastAPI/templates/static assets |
 | App-owned persistence | `/data` inside the app |
 | Protected Home Assistant files | Never read by The Archivist |
@@ -49,6 +52,7 @@ Godot is not part of the current repository. If a future UI is added, it must re
 7. Summary counts are derived from returned state payloads.
 8. SQLite stores the snapshot and entity observations.
 9. The app exposes the snapshot as a downloadable JSON audit bundle.
+10. Watcher compares the new stored snapshot with the previous one, persists stable findings, and includes them in the bundle.
 
 ## Module responsibilities
 
@@ -56,9 +60,9 @@ Godot is not part of the current repository. If a future UI is added, it must re
 
 Collects and stores read-only observations and produces an audit summary.
 
-### Planned: Watcher
+### Implemented: Watcher
 
-Future monitoring subsystem for detecting changes or recurring health conditions. No implementation exists yet.
+Compares adjacent snapshots for meaningful entity, battery, and automation health changes. Findings are keyed by stable fingerprints, retain current/previous snapshot evidence, and transition between active and resolved states. A local scheduler invokes the same collector daily by default.
 
 ### Planned: Curator
 

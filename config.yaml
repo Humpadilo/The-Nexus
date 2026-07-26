@@ -1,5 +1,5 @@
 name: The Archivist
-version: "0.1.0"
+version: "0.2.0"
 slug: the_archivist
 description: Read-only local snapshots and audits of a Home Assistant instance.
 url: https://github.com/Humpadilo/The-Nexus
@@ -16,8 +16,14 @@ panel_icon: mdi:archive-search
 map:
   - type: data
     read_only: false
-options: {}
-schema: {}
+options:
+  schedule_enabled: true
+  schedule_interval_hours: 24
+  finding_retention_days: 365
+schema:
+  schedule_enabled: bool
+  schedule_interval_hours: int(1,168)
+  finding_retention_days: int(30,3650)
 ports:
   8099/tcp: null
 ports_description:

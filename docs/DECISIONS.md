@@ -2,6 +2,30 @@
 
 Major architectural choices are recorded here so future contributors can understand the reason behind the current shape of the project.
 
+## ADR-005 — Watcher uses stable finding fingerprints
+
+**Status:** Accepted
+
+Watcher findings are keyed by `category:entity_id` and upserted in SQLite. Unchanged active conditions update `last_seen`, evidence, and occurrence count instead of creating another row. Recovery changes the existing row to `resolved`; a returning condition reopens it.
+
+## ADR-006 — Watcher compares snapshots, not the event stream
+
+**Status:** Accepted
+
+Version 0.2 runs comparisons after manual or scheduled snapshots. It does not add a long-lived Home Assistant event subscription, keeping the app local, restart-safe, and aligned with the existing read-only snapshot architecture.
+
+## ADR-007 — Daily scheduling is the initial default
+
+**Status:** Accepted
+
+The app schedules one local snapshot/check every 24 hours by default. App options can disable scheduling or set an interval from 1 to 168 hours. Resolved findings are retained for 365 days by default and can be configured from 30 to 3650 days.
+
+## ADR-008 — Expected state classification is registry-backed and conservative
+
+**Status:** Accepted
+
+An unavailable or unknown entity is marked expected only when the available entity registry identifies it as disabled. Missing registry data never suppresses a finding.
+
 ## ADR-001 — The Archivist runs locally
 
 **Status:** Accepted

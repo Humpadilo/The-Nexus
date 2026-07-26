@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0 - 2026-07-27
+
+- Added The Watcher for evidence-backed snapshot comparison.
+- Added persisted active/resolved findings with severity, confidence, timestamps, occurrence counts, and current/previous snapshot evidence.
+- Added detection for entity availability, entity additions/removals, low batteries, and automation availability changes.
+- Added daily-by-default scheduled read-only checks and configurable resolved-finding retention.
+- Added Watcher Ingress view, findings JSON export, and audit bundle integration.
+- Added Watcher fixtures and persistence, endpoint, scheduler, deduplication, recovery, and classification tests.
+
 ## 0.1.0 - 2026-07-26
 
 - Published Version 0.1 to the private `Humpadilo/The-Nexus` repository.

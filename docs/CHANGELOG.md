@@ -2,6 +2,16 @@
 
 This documentation changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The root [CHANGELOG.md](../CHANGELOG.md) remains the release-facing project history.
 
+## [0.2.0] - 2026-07-27
+
+### Added
+
+- Watcher snapshot comparison and evidence-backed findings.
+- Stable finding fingerprints with active, ongoing, and resolved states.
+- Configurable daily scheduling and resolved-finding retention.
+- Ingress findings view, JSON export, and audit bundle findings.
+- Watcher specifications, decisions, architecture updates, and tests.
+
 ## [0.1.0] - 2026-07-26
 
 ### Added

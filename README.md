@@ -4,9 +4,11 @@ The Archivist is a local Home Assistant app/add-on that creates read-only snapsh
 
 The long-term project documentation is maintained under [`docs/`](docs/README.md). Start with the [Nexus documentation overview](docs/README.md), then use the [architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md), [project rules](docs/PROJECT_RULES.md), and [decisions](docs/DECISIONS.md) for context.
 
-## Version 1
+## Version 0.2 — The Watcher
 
-The Ingress page provides a manual **Run Snapshot** action, a health endpoint at `/health`, a summary of entity health, and a downloadable JSON audit bundle. The collector uses `SUPERVISOR_TOKEN` with the Home Assistant REST API for states and the WebSocket API for entity, device, and area registries. Registry failures are tolerated and recorded as empty collections.
+The Ingress page provides a manual **Run Snapshot** action, a health endpoint at `/health`, a summary of entity health, a Watcher view, and downloadable JSON audit and findings bundles. Watcher compares adjacent snapshots, records new, ongoing, and resolved findings with evidence, severity, confidence, and timestamps, and avoids duplicate rows for unchanged conditions.
+
+Watcher checks run daily by default. The Home Assistant app options `schedule_enabled`, `schedule_interval_hours`, and `finding_retention_days` control local scheduling and resolved-finding retention. All behavior remains read-only.
 
 The foundation reserves these future module names: `Archivist`, `Watcher`, `Curator`, `Oracle`, and `Steward`. AI analysis and configuration repair are intentionally out of scope.
 
@@ -29,7 +31,7 @@ For local development, place the repository in Home Assistant's local app reposi
 
 The app definition enables Ingress on port 8099 and maps the add-on data directory. The Dockerfile uses an explicit Python 3.12 base image; the obsolete `build.yaml` file is no longer required by current Home Assistant app builds.
 
-Sprint 1 verification covers health, Ingress rendering, static assets, manual snapshot execution with a fake Home Assistant client, SQLite persistence, and JSON audit downloads. The live Home Assistant installation uses the public GitHub repository above.
+Sprint 1 was verified live on Home Assistant OS and is tagged `v0.1.0-verified`. Version 0.2 adds Watcher comparison and scheduling; local tests cover transitions, expected classification, persistence, deduplication, recovery, and exports.
 
 ## Safety and permissions
 

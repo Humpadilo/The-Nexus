@@ -102,3 +102,35 @@ As a Home Assistant owner, I want to press one button to capture the current hea
 - Unit-test SQLite snapshot round trips using a temporary database.
 - Unit-test collection with a fake Home Assistant client.
 - Perform a manual Home Assistant OS installation test before release.
+
+## Feature: Watcher snapshot comparison (Version 0.2)
+
+### Goal
+
+Turn persisted Archivist snapshots into low-noise, evidence-backed health and change findings without modifying Home Assistant.
+
+### User story
+
+As a Home Assistant owner, I want the Archivist to show what changed since the last snapshot and whether an issue is new, ongoing, or resolved, so that I can investigate only meaningful conditions.
+
+### Requirements
+
+- Compare adjacent snapshots and detect unavailable/unknown transitions, added and removed entities, low batteries, and automation availability changes.
+- Classify disabled registry entities as expected where registry data makes that distinction available.
+- Persist one finding per stable category/entity fingerprint with severity, confidence, first-seen, last-seen, occurrence count, resolution status, and snapshot evidence.
+- Update ongoing findings instead of creating duplicate rows.
+- Run checks manually and on a configurable local schedule, daily by default.
+- Show active and resolved findings in Ingress and export machine-readable findings JSON.
+- Include findings in snapshot audit bundles and retain resolved findings for a configurable period.
+
+### Non-goals
+
+- AI analysis, recommendations, YAML generation, configuration changes, automatic repair, notifications, or cloud dependencies.
+
+### Acceptance criteria
+
+- Two snapshots produce persisted findings with evidence and stable fingerprints.
+- Repeated unchanged conditions update one finding and its occurrence count.
+- Recovery marks the same finding resolved.
+- Manual and scheduled checks use the same read-only collection path.
+- Tests cover detection, expected classification, deduplication, recovery, persistence, exports, and scheduling configuration.

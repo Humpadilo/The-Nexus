@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from .models import EntityObservation, Snapshot
+from archivist.watcher.models import FindingCandidate
 
 
 class Database:
@@ -42,7 +43,29 @@ class Database:
                     state TEXT NOT NULL,
                     attributes_json TEXT NOT NULL
                 );
+                CREATE TABLE IF NOT EXISTS watcher_findings (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    fingerprint TEXT NOT NULL UNIQUE,
+                    category TEXT NOT NULL,
+                    entity_id TEXT,
+                    title TEXT NOT NULL,
+                    description TEXT NOT NULL,
+                    severity TEXT NOT NULL,
+                    confidence TEXT NOT NULL,
+                    expected INTEGER NOT NULL DEFAULT 0,
+                    status TEXT NOT NULL,
+                    first_seen TEXT NOT NULL,
+                    last_seen TEXT NOT NULL,
+                    resolved_at TEXT,
+                    occurrence_count INTEGER NOT NULL DEFAULT 1,
+                    first_snapshot_id INTEGER NOT NULL,
+                    last_snapshot_id INTEGER NOT NULL,
+                    evidence_json TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_watcher_status ON watcher_findings(status);
+                CREATE INDEX IF NOT EXISTS idx_watcher_last_seen ON watcher_findings(last_seen);
             """)
+            conn.execute("PRAGMA user_version = 2")
 
     def save_snapshot(self, summary: dict[str, int], observations: list[EntityObservation], registries: dict[str, Any]) -> int:
         captured_at = datetime.now(UTC).isoformat()
@@ -72,11 +95,16 @@ class Database:
                 "SELECT entity_id, state, attributes_json FROM entity_observations WHERE snapshot_id = ? ORDER BY entity_id",
                 (snapshot_id,),
             ).fetchall()
+            findings = conn.execute(
+                "SELECT * FROM watcher_findings WHERE first_snapshot_id <= ? ORDER BY status, severity DESC, last_seen DESC",
+                (snapshot_id,),
+            ).fetchall()
         return {
             "id": row["id"], "captured_at": row["captured_at"],
             "summary": {key: row[key] for key in ("total_entities", "unavailable_entities", "unknown_entities", "disabled_or_unavailable_automations", "low_battery_entities")},
             "registries": json.loads(row["registries_json"]),
             "entities": [{"entity_id": item["entity_id"], "state": item["state"], "attributes": json.loads(item["attributes_json"])} for item in observations],
+            "watcher_findings": [self._finding_dict(item) for item in findings],
         }
 
     def latest_snapshot(self) -> Snapshot | None:
@@ -85,3 +113,73 @@ class Database:
         if row is None:
             return None
         return Snapshot(row["id"], datetime.fromisoformat(row["captured_at"]), row["total_entities"], row["unavailable_entities"], row["unknown_entities"], row["disabled_or_unavailable_automations"], row["low_battery_entities"])
+
+    def list_findings(self, status: str | None = None, limit: int | None = None) -> list[dict[str, Any]]:
+        query = "SELECT * FROM watcher_findings"
+        parameters: list[Any] = []
+        if status:
+            query += " WHERE status = ?"
+            parameters.append(status)
+        query += " ORDER BY CASE severity WHEN 'critical' THEN 0 WHEN 'warning' THEN 1 ELSE 2 END, last_seen DESC"
+        if limit is not None:
+            query += " LIMIT ?"
+            parameters.append(limit)
+        with self._connect() as conn:
+            rows = conn.execute(query, parameters).fetchall()
+        return [self._finding_dict(row) for row in rows]
+
+    def save_findings(self, findings: list[FindingCandidate]) -> None:
+        with self._connect() as conn:
+            for finding in findings:
+                existing = conn.execute(
+                    "SELECT * FROM watcher_findings WHERE fingerprint = ?", (finding.fingerprint,)
+                ).fetchone()
+                observed_at = finding.observed_at.isoformat()
+                if existing is None:
+                    conn.execute(
+                        """INSERT INTO watcher_findings
+                        (fingerprint, category, entity_id, title, description, severity, confidence,
+                         expected, status, first_seen, last_seen, resolved_at, occurrence_count,
+                         first_snapshot_id, last_snapshot_id, evidence_json)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                        (finding.fingerprint, finding.category, finding.entity_id, finding.title,
+                         finding.description, finding.severity, finding.confidence, int(finding.expected),
+                         finding.status, observed_at, observed_at,
+                         observed_at if finding.status == "resolved" else None, 1,
+                         finding.snapshot_id, finding.snapshot_id, json.dumps(finding.evidence)),
+                    )
+                    continue
+                reopened = existing["status"] == "resolved" and finding.status == "active"
+                conn.execute(
+                    """UPDATE watcher_findings SET category = ?, entity_id = ?, title = ?, description = ?,
+                    severity = ?, confidence = ?, expected = ?, status = ?, first_seen = ?, last_seen = ?,
+                    resolved_at = ?, occurrence_count = ?, first_snapshot_id = ?, last_snapshot_id = ?, evidence_json = ?
+                    WHERE fingerprint = ?""",
+                    (finding.category, finding.entity_id, finding.title, finding.description,
+                     finding.severity, finding.confidence, int(finding.expected), finding.status,
+                     observed_at if reopened else existing["first_seen"], observed_at,
+                     observed_at if finding.status == "resolved" else None,
+                     int(existing["occurrence_count"]) + 1, finding.snapshot_id if reopened else existing["first_snapshot_id"],
+                     finding.snapshot_id, json.dumps(finding.evidence), finding.fingerprint),
+                )
+
+    def prune_resolved_findings(self, older_than_days: int) -> int:
+        cutoff = datetime.now(UTC).timestamp() - older_than_days * 86400
+        cutoff_iso = datetime.fromtimestamp(cutoff, UTC).isoformat()
+        with self._connect() as conn:
+            cursor = conn.execute(
+                "DELETE FROM watcher_findings WHERE status = 'resolved' AND resolved_at < ?", (cutoff_iso,)
+            )
+        return cursor.rowcount
+
+    @staticmethod
+    def _finding_dict(row: sqlite3.Row) -> dict[str, Any]:
+        return {
+            "id": row["id"], "fingerprint": row["fingerprint"], "category": row["category"],
+            "entity_id": row["entity_id"], "title": row["title"], "description": row["description"],
+            "severity": row["severity"], "confidence": row["confidence"], "expected": bool(row["expected"]),
+            "status": row["status"], "first_seen": row["first_seen"], "last_seen": row["last_seen"],
+            "resolved_at": row["resolved_at"], "occurrence_count": row["occurrence_count"],
+            "first_snapshot_id": row["first_snapshot_id"], "last_snapshot_id": row["last_snapshot_id"],
+            "evidence": json.loads(row["evidence_json"]),
+        }

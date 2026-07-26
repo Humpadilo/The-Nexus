@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -19,6 +20,7 @@ from archivist.collector.service import Collector
 from archivist.config import Settings
 from archivist.logging import configure_logging
 from archivist.storage.database import Database
+from archivist.watcher.scheduler import WatcherScheduler
 
 configure_logging()
 logger = logging.getLogger(__name__)
@@ -35,7 +37,19 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
     async def lifespan(_: FastAPI) -> Iterator[None]:
         current_settings.data_dir.mkdir(parents=True, exist_ok=True)
         current_settings.bundles_dir.mkdir(parents=True, exist_ok=True)
-        yield
+        scheduled_task: asyncio.Task[None] | None = None
+        if current_settings.schedule_enabled:
+            scheduled_task = asyncio.create_task(
+                WatcherScheduler(collector, current_settings.schedule_interval_hours).run()
+            )
+            logger.info("watcher_scheduler_started", extra={"interval_hours": current_settings.schedule_interval_hours})
+        try:
+            yield
+        finally:
+            if scheduled_task is not None:
+                scheduled_task.cancel()
+                await asyncio.gather(scheduled_task, return_exceptions=True)
+                logger.info("watcher_scheduler_stopped")
 
     application = FastAPI(title="The Archivist", lifespan=lifespan)
     application.mount(
@@ -61,12 +75,14 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
     @application.get("/", response_class=HTMLResponse)
     async def index(request: Request):
         latest = current_database.latest_snapshot()
-        return templates.TemplateResponse(request=request, name="index.html", context={"latest": latest})
+        findings = current_database.list_findings(limit=25)
+        return templates.TemplateResponse(request=request, name="index.html", context={"latest": latest, "findings": findings})
 
     @application.post("/snapshot")
     async def run_snapshot() -> Response:
         try:
             result = await collector().run()
+            current_database.prune_resolved_findings(current_settings.finding_retention_days)
             current_settings.bundles_dir.mkdir(parents=True, exist_ok=True)
             bundle_path = current_settings.bundles_dir / f"snapshot-{result.snapshot_id}.json"
             bundle_path.write_text(json.dumps(result.bundle, indent=2), encoding="utf-8")
@@ -85,6 +101,15 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
             media_type="application/json",
             headers={"Content-Disposition": f"attachment; filename=snapshot-{snapshot_id}.json"},
         )
+
+    @application.get("/watcher/findings")
+    async def watcher_findings() -> JSONResponse:
+        return JSONResponse({"findings": current_database.list_findings()})
+
+    @application.get("/watcher/findings.json")
+    async def watcher_findings_download() -> Response:
+        payload = json.dumps({"findings": current_database.list_findings()}, indent=2)
+        return Response(payload, media_type="application/json", headers={"Content-Disposition": "attachment; filename=watcher-findings.json"})
 
     return application
 

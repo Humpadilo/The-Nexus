@@ -31,9 +31,27 @@ Version 0.1.0 was installed from the public repository on 2026-07-26 and verifie
 - The local test suite passed with 5 tests.
 - The verified release is tagged `v0.1.0`.
 
-## Sprint 2 — The Watcher
+## Sprint 2 — The Watcher — complete
 
 Watcher compares stored snapshots, persists evidence-backed findings, exposes a low-noise Ingress view, and schedules local read-only checks.
+
+### Completed
+
+- [x] Compare adjacent snapshots for meaningful changes.
+- [x] Detect availability, additions/removals, low batteries, and automation changes.
+- [x] Classify disabled entities as expected when registry data permits.
+- [x] Persist severity, confidence, timestamps, status, occurrence count, and evidence.
+- [x] Deduplicate unchanged conditions and mark recoveries resolved.
+- [x] Add daily-by-default scheduling and configurable retention.
+- [x] Add Ingress findings view and machine-readable exports.
+- [x] Add migrations, fixtures, structured logs, and tests.
+- [x] Complete live Home Assistant OS smoke verification.
+
+### Sprint 2 verification
+
+- Local suite: 9 tests passed.
+- Release: `v0.2.0`.
+- Live Home Assistant OS: upgraded app started successfully, Ingress Watcher view loaded, manual comparison check completed, and findings export downloaded and validated.
 
 ### Blocked
 

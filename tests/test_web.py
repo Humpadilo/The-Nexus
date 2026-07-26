@@ -52,3 +52,5 @@ def test_snapshot_and_audit_download(tmp_path: Path, monkeypatch) -> None:
     assert download.status_code == 200
     assert download.headers["content-disposition"] == f"attachment; filename=snapshot-{snapshot_id}.json"
     assert download.json()["entities"][0]["entity_id"] == "light.unavailable"
+    assert client.get("/watcher/findings").status_code == 200
+    assert client.get("/watcher/findings.json").headers["content-disposition"] == "attachment; filename=watcher-findings.json"
