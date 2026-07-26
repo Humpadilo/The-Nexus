@@ -11,7 +11,7 @@ class Settings:
     host: str = os.getenv("ARCHIVIST_HOST", "0.0.0.0")
     port: int = int(os.getenv("ARCHIVIST_PORT", "8099"))
     ha_rest_url: str = os.getenv("SUPERVISOR_CORE_API", "http://supervisor/core/api")
-    ha_ws_url: str = os.getenv("SUPERVISOR_CORE_WS", "ws://supervisor/core/api/websocket")
+    ha_ws_url: str = os.getenv("SUPERVISOR_CORE_WS", "ws://supervisor/core/websocket")
     supervisor_token: str | None = os.getenv("SUPERVISOR_TOKEN")
 
     @property

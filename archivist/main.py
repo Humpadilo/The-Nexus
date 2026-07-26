@@ -5,10 +5,13 @@ from __future__ import annotations
 import json
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
+from typing import Iterator
 
 import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse, Response
+from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from archivist.api.home_assistant import HomeAssistantClient
@@ -19,55 +22,76 @@ from archivist.storage.database import Database
 
 configure_logging()
 logger = logging.getLogger(__name__)
-settings = Settings()
-database = Database(settings.database_path)
-templates = Jinja2Templates(directory="archivist/templates")
+TEMPLATES_DIRECTORY = Path(__file__).resolve().parent / "templates"
 
 
-@asynccontextmanager
-async def lifespan(_: FastAPI):
-    settings.data_dir.mkdir(parents=True, exist_ok=True)
-    settings.bundles_dir.mkdir(parents=True, exist_ok=True)
-    yield
+def create_app(app_settings: Settings | None = None, app_database: Database | None = None) -> FastAPI:
+    """Create the web application with injectable settings and storage for testing."""
+    current_settings = app_settings or Settings()
+    current_database = app_database or Database(current_settings.database_path)
+    templates = Jinja2Templates(directory=str(TEMPLATES_DIRECTORY))
+
+    @asynccontextmanager
+    async def lifespan(_: FastAPI) -> Iterator[None]:
+        current_settings.data_dir.mkdir(parents=True, exist_ok=True)
+        current_settings.bundles_dir.mkdir(parents=True, exist_ok=True)
+        yield
+
+    application = FastAPI(title="The Archivist", lifespan=lifespan)
+    application.mount(
+        "/static",
+        StaticFiles(directory=str(Path(__file__).resolve().parent / "static")),
+        name="static",
+    )
+
+    def collector() -> Collector:
+        return Collector(
+            HomeAssistantClient(
+                current_settings.ha_rest_url,
+                current_settings.ha_ws_url,
+                current_settings.supervisor_token,
+            ),
+            current_database,
+        )
+
+    @application.get("/health")
+    async def health() -> dict[str, str]:
+        return {"status": "ok", "service": "the-archivist"}
+
+    @application.get("/", response_class=HTMLResponse)
+    async def index(request: Request):
+        latest = current_database.latest_snapshot()
+        return templates.TemplateResponse(request=request, name="index.html", context={"latest": latest})
+
+    @application.post("/snapshot")
+    async def run_snapshot() -> Response:
+        try:
+            result = await collector().run()
+            current_settings.bundles_dir.mkdir(parents=True, exist_ok=True)
+            bundle_path = current_settings.bundles_dir / f"snapshot-{result.snapshot_id}.json"
+            bundle_path.write_text(json.dumps(result.bundle, indent=2), encoding="utf-8")
+            return JSONResponse({"snapshot_id": result.snapshot_id, "summary": result.bundle["summary"]})
+        except Exception:
+            logger.exception("snapshot_failed")
+            return JSONResponse({"error": "Snapshot failed. Check the app logs."}, status_code=502)
+
+    @application.get("/audit/{snapshot_id}.json")
+    async def audit(snapshot_id: int) -> Response:
+        bundle = current_database.get_snapshot(snapshot_id)
+        if bundle is None:
+            return JSONResponse({"error": "Snapshot not found"}, status_code=404)
+        return Response(
+            json.dumps(bundle, indent=2),
+            media_type="application/json",
+            headers={"Content-Disposition": f"attachment; filename=snapshot-{snapshot_id}.json"},
+        )
+
+    return application
 
 
-app = FastAPI(title="The Archivist", lifespan=lifespan)
-
-
-def collector() -> Collector:
-    return Collector(HomeAssistantClient(settings.ha_rest_url, settings.ha_ws_url, settings.supervisor_token), database)
-
-
-@app.get("/health")
-async def health() -> dict[str, str]:
-    return {"status": "ok", "service": "the-archivist"}
-
-
-@app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    latest = database.latest_snapshot()
-    return templates.TemplateResponse(request=request, name="index.html", context={"latest": latest})
-
-
-@app.post("/snapshot")
-async def run_snapshot() -> Response:
-    try:
-        result = await collector().run()
-        settings.bundles_dir.mkdir(parents=True, exist_ok=True)
-        (settings.bundles_dir / f"snapshot-{result.snapshot_id}.json").write_text(json.dumps(result.bundle, indent=2), encoding="utf-8")
-        return JSONResponse({"snapshot_id": result.snapshot_id, "summary": result.bundle["summary"]})
-    except Exception:
-        logger.exception("snapshot_failed")
-        return JSONResponse({"error": "Snapshot failed. Check the app logs."}, status_code=502)
-
-
-@app.get("/audit/{snapshot_id}.json")
-async def audit(snapshot_id: int) -> Response:
-    bundle = database.get_snapshot(snapshot_id)
-    if bundle is None:
-        return JSONResponse({"error": "Snapshot not found"}, status_code=404)
-    return Response(json.dumps(bundle, indent=2), media_type="application/json", headers={"Content-Disposition": f"attachment; filename=snapshot-{snapshot_id}.json"})
+app = create_app()
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host=settings.host, port=settings.port, proxy_headers=True)
+    runtime_settings = Settings()
+    uvicorn.run(app, host=runtime_settings.host, port=runtime_settings.port, proxy_headers=True)

@@ -22,11 +22,14 @@ class HomeAssistantClient:
         return {"Authorization": f"Bearer {self.token}", "Content-Type": "application/json"} if self.token else {}
 
     async def get_states(self) -> list[dict[str, Any]]:
-        async with aiohttp.ClientSession(timeout=self.timeout, headers=self.headers) as session:
-            async with session.get(f"{self.rest_url}/states") as response:
-                if response.status != 200:
-                    raise HomeAssistantApiError(f"states request returned HTTP {response.status}")
-                return await response.json()
+        try:
+            async with aiohttp.ClientSession(timeout=self.timeout, headers=self.headers) as session:
+                async with session.get(f"{self.rest_url}/states") as response:
+                    if response.status != 200:
+                        raise HomeAssistantApiError(f"states request returned HTTP {response.status}")
+                    return await response.json()
+        except (aiohttp.ClientError, asyncio.TimeoutError) as exc:
+            raise HomeAssistantApiError(str(exc)) from exc
 
     async def websocket_command(self, command: str, **payload: Any) -> list[dict[str, Any]]:
         if not self.token:

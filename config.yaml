@@ -2,13 +2,11 @@ name: The Archivist
 version: "0.1.0"
 slug: the_archivist
 description: Read-only local snapshots and audits of a Home Assistant instance.
-url: https://github.com/example/the-archivist
+url: https://github.com/Humpadilo/The-Nexus
 arch:
   - amd64
   - aarch64
-  - armv7
-  - armhf
-  - i386
+homeassistant_api: true
 startup: application
 boot: auto
 init: false
