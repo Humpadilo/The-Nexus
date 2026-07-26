@@ -18,6 +18,7 @@ from fastapi.templating import Jinja2Templates
 from archivist.api.home_assistant import HomeAssistantClient
 from archivist.collector.service import Collector
 from archivist.config import Settings
+from archivist.dashboard.service import DashboardBuilder
 from archivist.logging import configure_logging
 from archivist.storage.database import Database
 from archivist.watcher.scheduler import WatcherScheduler
@@ -76,7 +77,14 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
     async def index(request: Request):
         latest = current_database.latest_snapshot()
         findings = current_database.list_findings(limit=25)
-        return templates.TemplateResponse(request=request, name="index.html", context={"latest": latest, "findings": findings})
+        latest_bundle = current_database.get_snapshot(latest.id) if latest else None
+        dashboard = DashboardBuilder().build(
+            latest_bundle, current_database.list_snapshots(), current_database.list_findings()
+        )
+        return templates.TemplateResponse(
+            request=request, name="index.html",
+            context={"latest": latest, "findings": findings, "dashboard": dashboard},
+        )
 
     @application.post("/snapshot")
     async def run_snapshot() -> Response:

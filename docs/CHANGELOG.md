@@ -18,7 +18,14 @@ This documentation changelog follows [Keep a Changelog](https://keepachangelog.c
 - Completed two live snapshots; the second contained 438 entities, 20 unavailable, 122 unknown, and 143 persisted findings.
 - Downloaded and validated the audit bundle and findings export.
 
-## [0.3.0] - Unreleased
+## [0.4.0] - Unreleased
+
+### Added
+
+- The Nexus Dashboard with overview, health, semantic explorer, timeline, and reports sections.
+- Dashboard projections and tests over existing semantic and Watcher data.
+
+## [0.3.0] - 2026-07-26
 
 ### Added
 
@@ -26,6 +33,12 @@ This documentation changelog follows [Keep a Changelog](https://keepachangelog.c
 - Canonical entity, device, area, capability, and health facts with provenance and confidence.
 - Dashboard-oriented summaries, grouping fields, relationships, and semantic JSON exports.
 - SQLite schema migration and tests for deterministic replacement-safe projections.
+
+### Live verification
+
+- Version 0.3.0 installed and ran on Home Assistant OS.
+- Ingress loaded and manual snapshot 4 completed: 437 entities, 20 unavailable, 120 unknown.
+- The JSON audit bundle parsed successfully with semantic schema 1, 1,379 facts, 60 devices, and 8 areas.
 
 ## [0.1.0] - 2026-07-26
 

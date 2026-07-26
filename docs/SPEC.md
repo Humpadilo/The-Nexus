@@ -194,3 +194,17 @@ As a Home Assistant owner, I want the Archivist to show what changed since the l
 - Recovery marks the same finding resolved.
 - Manual and scheduled checks use the same read-only collection path.
 - Tests cover detection, expected classification, deduplication, recovery, persistence, exports, and scheduling configuration.
+
+## Feature: The Nexus Dashboard (Version 0.4)
+
+The dashboard is a read-only presentation consumer of semantic projections and Watcher findings. It must not create a competing interpretation of Home Assistant data or add a write path.
+
+### Acceptance criteria
+
+- Ingress provides intuitive Overview, Health, Explorer, Timeline, and Reports sections.
+- Overview shows latest snapshot, entity/device/area counts, finding counts, overall health, and recent activity.
+- Health separates critical, warning, informational, and resolved Watcher findings.
+- Explorer exposes semantic areas, devices, capabilities, relationships, entities, and health context.
+- Timeline shows stored snapshot history and report links expose audit, semantic, and Watcher exports.
+- Dashboard data remains usable when registries are incomplete and is derived from local SQLite records.
+- Tests cover dashboard grouping, health classification, semantic rendering, and existing web endpoints.

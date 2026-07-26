@@ -30,6 +30,8 @@ def test_health_and_ingress_page(tmp_path: Path) -> None:
     assert health.json() == {"status": "ok", "service": "the-archivist"}
     assert page.status_code == 200
     assert "The Archivist" in page.text
+    assert "The Nexus" in page.text
+    assert "Semantic map" in page.text
     assert client.get("/static/styles.css").status_code == 200
 
 

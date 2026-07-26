@@ -165,6 +165,22 @@ class Database:
             return None
         return Snapshot(row["id"], datetime.fromisoformat(row["captured_at"]), row["total_entities"], row["unavailable_entities"], row["unknown_entities"], row["disabled_or_unavailable_automations"], row["low_battery_entities"])
 
+    def list_snapshots(self, limit: int = 12) -> list[Snapshot]:
+        """Return recent snapshot metadata for the dashboard timeline."""
+        with self._connect() as conn:
+            rows = conn.execute(
+                "SELECT * FROM snapshots ORDER BY id DESC LIMIT ?", (limit,)
+            ).fetchall()
+        return [
+            Snapshot(
+                row["id"], datetime.fromisoformat(row["captured_at"]),
+                row["total_entities"], row["unavailable_entities"],
+                row["unknown_entities"], row["disabled_or_unavailable_automations"],
+                row["low_battery_entities"],
+            )
+            for row in rows
+        ]
+
     def list_findings(self, status: str | None = None, limit: int | None = None) -> list[dict[str, Any]]:
         query = "SELECT * FROM watcher_findings"
         parameters: list[Any] = []

@@ -2,7 +2,7 @@
 
 This file tracks current development. Completed sprints remain here as an historical record. Detailed future ideas belong in the roadmap or parking lot.
 
-## Current sprint — Sprint 4: Curator
+## Current sprint — Sprint 5: Curator
 
 ### Completed
 
@@ -88,14 +88,33 @@ Create the deterministic translation boundary between Archivist snapshots and hi
 
 ### Sprint 4 ordering
 
-Sprint 3 is complete locally. Sprint 4 will implement Curator as the organizer and presentation layer over the verified semantic contracts.
+Sprint 3 is complete and verified. Sprint 4 implements The Nexus Dashboard as the presentation layer over the verified semantic contracts.
 
 ### Sprint 3 verification
 
 - Version 0.3.0 semantic projection implemented.
 - Local suite: 13 tests passed.
 - Compilation and `git diff --check` passed.
-- Live Home Assistant installation remains the release verification step for Version 0.3.0.
+- Live Home Assistant OS: Version 0.3.0 installed and ran successfully after removing a stale duplicate repository source.
+- Ingress loaded and manual snapshot 4 completed: 437 entities, 20 unavailable, 120 unknown.
+- SQLite persistence was confirmed by the stored snapshot and reloadable Ingress view.
+- `snapshot-4.json` downloaded and validated: semantic schema 1, 1,379 facts, 60 devices, 8 areas, and fact provenance present.
+- Release verification tag: `v0.3.0-verified`.
+
+## Sprint 4 — The Nexus Dashboard — complete
+
+- [x] Add a polished read-only Overview, Health, Explorer, Timeline, and Reports experience.
+- [x] Render semantic entities, devices, areas, capabilities, relationships, and health context.
+- [x] Render Watcher active, ongoing, informational, and resolved findings without duplicate backend logic.
+- [x] Preserve manual snapshots, audit bundles, semantic exports, and findings exports.
+- [x] Add dashboard projection tests and responsive styling.
+- [x] Verify the dashboard locally and through Home Assistant Ingress.
+
+### Sprint 4 verification
+
+- Local suite: 14 tests passed.
+- Dashboard remains read-only and operates entirely from local SQLite semantic and Watcher data.
+- Version 0.4.0 is the release candidate for live Home Assistant verification.
 
 ## Completed sprint history
 

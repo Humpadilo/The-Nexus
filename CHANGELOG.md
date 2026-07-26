@@ -1,11 +1,19 @@
 # Changelog
 
-## 0.3.0 - Unreleased
+## 0.4.0 - Unreleased
+
+- Added The Nexus Dashboard with Overview, Health, semantic Explorer, Timeline, and Reports sections.
+- Added read-only dashboard projections over semantic facts and Watcher findings.
+- Added dashboard navigation, responsive styling, semantic drill-down tables, and report links.
+- Added dashboard service and web regression tests.
+
+## 0.3.0 - 2026-07-26
 
 - Added the rebuildable semantic knowledge projection for entities, devices, areas, capabilities, and health.
 - Added versioned semantic facts with stable identifiers, dashboard-oriented grouping fields, provenance, and confidence.
 - Added SQLite persistence, replacement-safe rebuilds, semantic audit data, and a read-only semantic JSON export.
 - Added semantic fixtures and tests for deterministic rebuilds, missing registries, provenance, persistence, collector integration, and exports.
+- Verified on Home Assistant OS: Version 0.3.0 installed and ran successfully, Ingress loaded, snapshot 4 collected 437 entities (20 unavailable, 120 unknown), and the downloaded audit bundle contained semantic schema version 1, 1,379 semantic facts, 60 devices, and 8 areas.
 
 ## 0.2.0 - 2026-07-27
 

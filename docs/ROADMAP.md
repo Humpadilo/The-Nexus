@@ -64,7 +64,7 @@ Introduce a small, deterministic semantic boundary between raw snapshots and hig
 
 Watcher and future Curator code can consume the same tested canonical facts, every fact remains traceable to stored observations, and missing registry data degrades predictably without blocking snapshots.
 
-## v0.4 — Curator
+## v0.4 — The Nexus Dashboard
 
 ### Goals
 
@@ -81,7 +81,7 @@ Organize canonical semantic facts into useful local views without duplicating Ho
 
 Users can navigate a coherent representation of their Home Assistant system and trace important information back to collected evidence.
 
-## v0.5 — Health Reports
+## v0.5 — Curator
 
 ### Goals
 
@@ -98,7 +98,7 @@ Turn observations into clear maintenance reports.
 
 Reports explain findings without requiring the user to inspect raw JSON.
 
-## v0.6 — AI Recommendations
+## v0.6 — Health Reports
 
 ### Goals
 
@@ -115,7 +115,7 @@ Introduce optional explanation and recommendation assistance.
 
 Recommendations are optional, explainable, and never silently applied.
 
-## v0.7 — YAML Generation
+## v0.7 — AI Recommendations
 
 ### Goals
 
@@ -131,7 +131,7 @@ Generate proposed Home Assistant configuration changes as reviewable artifacts.
 
 Users can inspect and reject generated changes without affecting production.
 
-## v0.8 — Simulation
+## v0.8 — YAML Generation
 
 ### Goals
 
@@ -147,7 +147,7 @@ Test proposed changes before applying them.
 
 The system can show expected effects and known risks before approval.
 
-## v0.9 — Approval Workflow
+## v0.9 — Simulation
 
 ### Goals
 
@@ -164,7 +164,7 @@ Formalize human approval for changes.
 
 No production change can occur without a visible, recorded approval.
 
-## v0.10 — Activity Intelligence
+## v0.10 — Approval Workflow
 
 ### Goals
 
@@ -180,7 +180,7 @@ Understand patterns such as occupancy, activity, and house modes without hiding 
 
 Activity insights are useful, local-first, and clear about uncertainty.
 
-## v1.0 — AI Home Engineer
+## v0.11 — Activity Intelligence
 
 ### Goals
 
