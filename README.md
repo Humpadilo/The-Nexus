@@ -12,10 +12,11 @@ The foundation reserves these future module names: `Archivist`, `Watcher`, `Cura
 
 ## Home Assistant OS installation
 
-1. Publish this repository to a Git host, keeping `repository.yaml` at the repository root.
+1. Use the private repository URL: `https://github.com/Humpadilo/The-Nexus`.
 2. In Home Assistant, open **Settings → Apps → App store**, choose the menu in the upper-right, and add the repository URL.
-3. Find **The Archivist**, install it, and start it.
-4. Open the app through the **Ingress** button in its Home Assistant app page.
+3. Because the repository is private, configure a GitHub read-only registry credential in the App store repository menu before adding or refreshing it.
+4. Find **The Archivist**, install it, and start it.
+5. Open the app through the **Ingress** button in its Home Assistant app page.
 
 The app requests only the Home Assistant Core API proxy permission. Supervisor injects `SUPERVISOR_TOKEN` at runtime; do not add a token to the repository or app options. The app stores its SQLite database and generated bundles in its persistent `/data` directory.
 
@@ -29,7 +30,7 @@ For local development, place the repository in Home Assistant's local app reposi
 
 The app definition enables Ingress on port 8099 and maps the add-on data directory. The Dockerfile uses an explicit Python 3.12 base image; the obsolete `build.yaml` file is no longer required by current Home Assistant app builds.
 
-Sprint 1 verification covers health, Ingress rendering, static assets, manual snapshot execution with a fake Home Assistant client, SQLite persistence, and JSON audit downloads. A real Home Assistant OS installation and live API collection still require a Home Assistant host.
+Sprint 1 verification covers health, Ingress rendering, static assets, manual snapshot execution with a fake Home Assistant client, SQLite persistence, and JSON audit downloads. The live Home Assistant installation additionally requires a GitHub credential when installing from the private repository.
 
 ## Safety and permissions
 

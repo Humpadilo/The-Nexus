@@ -20,12 +20,12 @@ This file tracks current development. Completed sprints remain here as an histor
 
 ### In progress
 
-- [ ] Validate installation on a real Home Assistant OS host.
+- [ ] Validate installation on a real Home Assistant OS host after configuring private-repository credentials.
 - [ ] Confirm registry behavior against supported Home Assistant versions.
 
 ### Blocked
 
-- None recorded. A real Home Assistant OS installation test requires access to a Home Assistant OS host.
+- The target Home Assistant host cannot clone the private GitHub repository until a GitHub registry credential is configured.
 
 ### Next sprint
 
