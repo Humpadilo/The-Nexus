@@ -195,6 +195,11 @@ Sprint 3 is complete and verified. Sprint 4 implements The Nexus Dashboard as th
 - [x] Add tests for lifecycle, multiple findings, and human-centered output.
 - [ ] Complete live post-approval repair verification after explicit approval.
 
+### Sprint 7 deployment correction
+
+- Version `0.7.0` increments the Home Assistant app version so Supervisor rebuilds the image containing the corrected Raven reference parser.
+- Numeric scene attribute keys are intentionally excluded from entity-reference findings.
+
 ### Sprint 7 boundary
 
 Sprint 7 remains read-only until Matt explicitly approves a bounded Engineer proposal. No Council, Tracy, or constitutional runtime concepts are introduced.

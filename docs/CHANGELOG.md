@@ -7,6 +7,8 @@ This documentation changelog follows [Keep a Changelog](https://keepachangelog.c
 - Added human-centered Raven sections for observed symptom, likely cause, restoration plan, and validation.
 - Preserved and prioritized multiple simultaneous findings and added investigation lifecycle state.
 - Improved Ingress repair review with expected effect and explicit validation guidance.
+- Corrected dependency token parsing so numeric scene attribute keys such as `14.1` are not reported as entity IDs.
+- Bumped the app release to `0.7.0` so Home Assistant performs a fresh image build for the Sprint 7 runtime.
 - No autonomous repair or constitutional runtime terminology introduced.
 
 ## Unreleased — architecture documentation alignment
