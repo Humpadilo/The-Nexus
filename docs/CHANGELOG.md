@@ -16,6 +16,13 @@ This documentation changelog follows [Keep a Changelog](https://keepachangelog.c
 - Curator is a read-only organization layer and does not modify Home Assistant.
 - Relationship discovery uses explicit references available in collected snapshot attributes; it does not read Home Assistant configuration files or invent dependencies.
 
+### Live verification
+
+- Version 0.5.0 installed and started successfully on Home Assistant OS.
+- Ingress loaded and the Curator view rendered after a live snapshot of 437 entities.
+- Curator export parsed successfully with 9 areas, 9 concepts, 48 explicit relationships, 94 organization cues, and provenance.
+- Local suite: 15 tests passed; release verification tag: `v0.5.0-verified`.
+
 ## [0.4.5] - 2026-07-26
 
 ### Added

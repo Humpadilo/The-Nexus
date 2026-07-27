@@ -153,9 +153,9 @@ Sprint 3 is complete and verified. Sprint 4 implements The Nexus Dashboard as th
 ### Sprint 5 verification
 
 - Version 0.5.0 built and installed successfully on Home Assistant OS.
-- Ingress loaded the Curator view after a live snapshot.
-- Live Curator projection organized the current Home Assistant snapshot by areas and included Unassigned where required.
-- Curator JSON export downloaded and parsed successfully with provenance and evidence fields.
+- The app started successfully and Ingress loaded the Curator view.
+- Live manual snapshot collected 437 entities; Curator organized 9 areas including Unassigned, 9 human concepts, and 48 explicit relationships.
+- Curator JSON export downloaded and parsed successfully with 94 organization cues and provenance/evidence fields.
 - Local suite: 15 tests passed.
 - Release verification tag: `v0.5.0-verified`.
 - Relationship discovery remains conservative and only reports explicit references available in collected state attributes.

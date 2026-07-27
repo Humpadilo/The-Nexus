@@ -18,6 +18,8 @@ Version 0.3 adds the implemented Semantic Knowledge Foundation. It is a rebuilda
 
 Version 0.4 adds The Nexus Dashboard as a read-only consumer of semantic facts and Watcher findings. Live Version 0.3 verification produced snapshot 4 with 437 entities, 20 unavailable, 120 unknown, 1,379 semantic facts, 60 devices, and 8 areas. Version 0.4.0 was then verified on Home Assistant OS: Ingress loaded, the dashboard rendered live semantic data, a manual snapshot collected 436 entities, 59 devices, and 8 areas, and its audit bundle parsed with 1,375 facts and provenance. Version 0.4.5 added the presentation-only Nexus Experience; live verification confirmed Version 0.4.5 running in Home Assistant, module-oriented Ingress navigation, a snapshot of 437 entities, 60 devices, and 8 areas, and an audit bundle with 1,379 facts and provenance. The verified release is tagged `v0.4.5-verified`.
 
+Version 0.5 adds Curator as the read-only human organization layer. Live verification confirmed Version 0.5.0 installed and running on Home Assistant OS, Ingress loaded, a snapshot of 437 entities, and a Curator export containing 9 areas, 9 human concepts, 48 explicit relationships, 94 organization cues, and provenance. The local suite passed 15 tests. The verified release is tagged `v0.5.0-verified`.
+
 ## Local-first assumption
 
 The Archivist runs as a Home Assistant app and continues operating without Codex or ChatGPT. This preserves local control and makes collection and reporting available even when development tools or cloud services are unavailable.
