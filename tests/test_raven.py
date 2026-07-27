@@ -74,3 +74,14 @@ def test_engineer_builds_bounded_house_mode_rename_proposal() -> None:
     assert updated["action"][0]["target"]["entity_id"] == "media_player.bedroom_matts_room"
     restored = EngineerProposalBuilder.apply_entity_replacements(updated, proposal["proposed_changes"], rollback=True)
     assert restored == configurations["automation.work_day_wakeup_2"]
+
+
+def test_raven_ignores_numeric_scene_attribute_keys() -> None:
+    references = RavenInvestigator._references(
+        {
+            "scene": {"entity_id": "14.1"},
+            "target": {"entity_id": "light.kitchen"},
+        }
+    )
+
+    assert references == {"light.kitchen"}

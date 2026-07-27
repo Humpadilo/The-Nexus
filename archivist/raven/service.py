@@ -8,7 +8,10 @@ from difflib import SequenceMatcher
 from typing import Any
 
 
-ENTITY_REFERENCE = re.compile(r"\b[a-z0-9_]+\.[a-z0-9_]+\b")
+# Home Assistant entity IDs have an alphabetic/underscore domain. Requiring
+# that prefix prevents scene attribute keys such as ``14.1`` from becoming
+# false entity references while still accepting normal IDs.
+ENTITY_REFERENCE = re.compile(r"\b[a-z_][a-z0-9_]*\.[a-z0-9_]+\b")
 HELPER_DOMAINS = {"input_boolean", "input_button", "input_datetime", "input_number", "input_select", "input_text", "counter", "timer", "schedule", "group"}
 
 
