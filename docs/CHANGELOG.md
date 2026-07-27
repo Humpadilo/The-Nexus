@@ -2,6 +2,20 @@
 
 This documentation changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The root [CHANGELOG.md](../CHANGELOG.md) remains the release-facing project history.
 
+## [0.5.0] - 2026-07-26
+
+### Added
+
+- Curator organization projection for areas, devices, entities, helpers, automations, scripts, scenes, human concepts, relationships, and health context.
+- Explicit `Unassigned` organization and evidence-backed organization cues for missing area assignments.
+- Curator JSON export endpoints and a progressive-disclosure Ingress view.
+- Deterministic actionable Watcher context with likely cause, impact, recommended read-only repair guidance, confidence, dependencies, evidence, and provenance.
+
+### Scope
+
+- Curator is a read-only organization layer and does not modify Home Assistant.
+- Relationship discovery uses explicit references available in collected snapshot attributes; it does not read Home Assistant configuration files or invent dependencies.
+
 ## [0.4.5] - 2026-07-26
 
 ### Added

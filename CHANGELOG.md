@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0 - 2026-07-26
+
+- Added Curator, a deterministic read-only organization projection over semantic facts, raw snapshot attributes, and Watcher findings.
+- Added area-centric organization with an explicit Unassigned area, human concept groupings, evidence-backed relationships, organization cues, and actionable finding context.
+- Added Curator JSON exports and a progressive-disclosure Curator view in Ingress.
+- Added Curator service and web coverage; local suite: 15 tests passed.
+- Curator relationships are limited to explicit references present in collected state attributes; unknown dependencies remain unknown.
+
 ## 0.4.5 - 2026-07-26
 
 - Added The Nexus Experience presentation layer with scalable module navigation, progressive disclosure, calmer overview language, and clearer health context.

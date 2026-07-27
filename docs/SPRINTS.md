@@ -139,11 +139,30 @@ Sprint 3 is complete and verified. Sprint 4 implements The Nexus Dashboard as th
 - Local suite: 14 tests passed.
 - Release verification tag: `v0.4.5-verified`.
 - Backend modules remain unchanged in ownership and behavior.
-- Sprint 5 Curator has not begun.
+
+## Sprint 5 — Curator — complete
+
+- [x] Add the deterministic Curator organization projection.
+- [x] Organize areas, devices, entities, helpers, automations, scripts, scenes, and an explicit Unassigned group.
+- [x] Add human concept groupings and conservative evidence-backed relationships.
+- [x] Enrich Watcher findings with likely cause, impact, dependencies, repair guidance, confidence, evidence, and provenance.
+- [x] Add Curator Ingress view, progressive disclosure, and JSON exports.
+- [x] Preserve read-only behavior and unknown-data boundaries.
+- [x] Add service, route, and web tests.
+
+### Sprint 5 verification
+
+- Version 0.5.0 built and installed successfully on Home Assistant OS.
+- Ingress loaded the Curator view after a live snapshot.
+- Live Curator projection organized the current Home Assistant snapshot by areas and included Unassigned where required.
+- Curator JSON export downloaded and parsed successfully with provenance and evidence fields.
+- Local suite: 15 tests passed.
+- Release verification tag: `v0.5.0-verified`.
+- Relationship discovery remains conservative and only reports explicit references available in collected state attributes.
 
 ### Next sprint
 
-- Sprint 5: Curator.
+- Sprint 6: Product review and next approved module planning.
 
 ## Completed sprint history
 

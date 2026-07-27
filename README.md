@@ -4,9 +4,9 @@ The Archivist is a local Home Assistant app/add-on that creates read-only snapsh
 
 The long-term project documentation is maintained under [`docs/`](docs/README.md). Start with the [Nexus documentation overview](docs/README.md), then use the [architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md), [project rules](docs/PROJECT_RULES.md), and [decisions](docs/DECISIONS.md) for context.
 
-## Version 0.4.5 — The Nexus Experience
+## Version 0.5.0 — Curator
 
-The Ingress page provides a polished read-only application experience with module-oriented navigation, contextual Overview health, Watcher findings, semantic Explorer, a story-oriented Timeline, and Reports. It provides a manual **Run Snapshot** action, a health endpoint at `/health`, and downloadable JSON audit, findings, and semantic projection bundles. The presentation layer uses versioned semantic facts plus Watcher findings; it does not add AI reasoning or Home Assistant writes.
+The Ingress page now includes Curator, a polished read-only organization layer for navigating the house by areas, human concepts, explicit relationships, and actionable Watcher context. It provides a manual **Run Snapshot** action, a health endpoint at `/health`, and downloadable JSON audit, findings, semantic, and Curator bundles. The presentation layer uses versioned semantic facts plus Watcher findings; it does not add AI reasoning or Home Assistant writes.
 
 Watcher checks run daily by default. The Home Assistant app options `schedule_enabled`, `schedule_interval_hours`, and `finding_retention_days` control local scheduling and resolved-finding retention. Semantic projections are rebuildable from stored Home Assistant state and registry data; raw snapshots remain authoritative. All behavior remains read-only.
 
@@ -31,7 +31,7 @@ For local development, place the repository in Home Assistant's local app reposi
 
 The app definition enables Ingress on port 8099 and maps the add-on data directory. The Dockerfile uses an explicit Python 3.12 base image; the obsolete `build.yaml` file is no longer required by current Home Assistant app builds.
 
-Sprint 1 was verified live on Home Assistant OS and is tagged `v0.1.0-verified`. Version 0.2 adds Watcher comparison and scheduling. Version 0.3 adds the rebuildable semantic projection and is tagged `v0.3.0-verified`. Version 0.4 adds The Nexus Dashboard and is tagged `v0.4.0-verified`. Version 0.4.5 adds The Nexus Experience and is tagged `v0.4.5-verified`.
+Sprint 1 was verified live on Home Assistant OS and is tagged `v0.1.0-verified`. Version 0.2 adds Watcher comparison and scheduling. Version 0.3 adds the rebuildable semantic projection and is tagged `v0.3.0-verified`. Version 0.4 adds The Nexus Dashboard and is tagged `v0.4.0-verified`. Version 0.4.5 adds The Nexus Experience and is tagged `v0.4.5-verified`. Version 0.5 adds Curator and will be tagged after live verification.
 
 ## Safety and permissions
 

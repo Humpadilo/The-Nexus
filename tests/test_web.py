@@ -31,7 +31,7 @@ def test_health_and_ingress_page(tmp_path: Path) -> None:
     assert page.status_code == 200
     assert "The Archivist" in page.text
     assert "The Nexus" in page.text
-    assert "Semantic map" in page.text
+    assert "Semantic Foundation" in page.text
     assert "Understand your home." in page.text
     assert "Curator" in page.text
     assert "The House Dreams Peacefully" in page.text
@@ -59,6 +59,11 @@ def test_snapshot_and_audit_download(tmp_path: Path, monkeypatch) -> None:
     assert download.json()["entities"][0]["entity_id"] == "light.unavailable"
     assert client.get("/watcher/findings").status_code == 200
     assert client.get("/watcher/findings.json").headers["content-disposition"] == "attachment; filename=watcher-findings.json"
+    curator_download = client.get(f"/curator/{snapshot_id}.json")
+    assert curator_download.status_code == 200
+    assert curator_download.headers["content-disposition"] == f"attachment; filename=curator-{snapshot_id}.json"
+    assert curator_download.json()["summary"]["entity_count"] == 2
+    assert client.get("/curator/latest.json").status_code == 200
     semantic_download = client.get(f"/semantic/{snapshot_id}.json")
     assert semantic_download.status_code == 200
     assert semantic_download.headers["content-disposition"] == f"attachment; filename=semantic-{snapshot_id}.json"

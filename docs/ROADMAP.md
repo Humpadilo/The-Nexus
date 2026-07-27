@@ -109,18 +109,18 @@ The Nexus feels like a coherent local application, navigation can grow into futu
 
 ### Goals
 
-Turn observations into clear maintenance reports.
+Turn semantic observations into a human-oriented map of the home and actionable, read-only health context.
 
 ### Expected features
 
-- Grouped health findings.
-- Severity and confidence fields.
-- Human-readable report views.
-- Report tests with stable fixtures.
+- Area-centric navigation with an explicit Unassigned grouping.
+- Human concepts layered over Home Assistant entities and domains.
+- Evidence-backed relationship exploration where explicit references are available.
+- Watcher findings enriched with cause, impact, dependencies, repair guidance, and confidence.
 
 ### Success criteria
 
-Reports explain findings without requiring the user to inspect raw JSON.
+Users can understand what belongs to an area and which known objects depend on one another without inspecting raw JSON.
 
 ## v0.6 — Health Reports
 

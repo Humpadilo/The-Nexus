@@ -74,7 +74,7 @@ Compares adjacent snapshots for meaningful entity, battery, and automation healt
 
 ### Planned: Curator
 
-Future organization and presentation subsystem. Curator consumes the semantic layer rather than independently interpreting raw Home Assistant payloads. No implementation exists yet.
+Curator is the human-oriented organization projection over semantic facts, stored snapshot attributes, and Watcher findings. It organizes areas (including `Unassigned`), devices, entities, helpers, automations, scripts, scenes, human concepts, relationships, and actionable health context. It is rebuilt per snapshot, retains provenance to evidence, and never modifies Home Assistant. Relationship discovery is deliberately conservative: only explicit entity references found in collected attributes are surfaced, while unavailable configuration leaves dependencies unknown.
 
 ### Implemented: Semantic knowledge layer
 
@@ -87,6 +87,22 @@ The layer is intentionally narrower than a general-purpose knowledge graph. Its 
 The read-only dashboard is the first presentation consumer of the semantic layer. It provides overview metrics, Watcher health groups, area/device/capability/entity exploration, snapshot timeline, and downloadable reports. It contains no Home Assistant write path and does not become a source of truth.
 
 Version 0.4.0 was verified on Home Assistant OS with the dashboard rendering from local SQLite semantic and Watcher data after a live snapshot of 436 entities, 59 devices, and 8 areas. The verified release is tagged `v0.4.0-verified`.
+
+### Tracy — Intelligence and orchestration
+
+Future layer defined by ADR-010. Tracy is responsible for conversation, intent understanding, personalization, planning, coordination across Nexus modules, and presenting evidence-backed recommendations. Tracy does not directly execute production changes, replace Home Assistant as a source of truth, or become a required runtime dependency.
+
+### Concierge — Interface role
+
+Future presentation/interface role through which Tracy may interact with users. A Concierge may be implemented as a touchscreen, voice interface, mobile experience, dashboard, or another future interface. It presents Tracy's context and recommendations but does not own conversation logic, automation logic, or production execution. The distinction is:
+
+```text
+Nexus modules → Tracy (intelligence and orchestration) → Concierge (presentation/interface) → user
+                                      ↓
+                         approval and implementation boundary
+```
+
+The Concierge is therefore not a core system component. Tracy and each Concierge must remain replaceable and must consume documented Nexus contracts.
 
 ### UX architecture review after Sprint 4
 
@@ -154,3 +170,13 @@ Archivist → Semantic layer → Watcher → Curator → Oracle → approval gat
 ```
 
 This is a roadmap boundary, not an implemented runtime pipeline.
+
+The long-term intelligence and interface relationship is separate from that execution path:
+
+```text
+Nexus modules → Tracy (intelligence and orchestration) → Interface roles such as Concierge → user
+                                      ↓
+                         approval gate → implementation boundary
+```
+
+This clarifies that Tracy coordinates understanding and planning, while Concierge is a replaceable presentation role. Neither is authorized to silently execute production changes.

@@ -208,3 +208,21 @@ The dashboard is a read-only presentation consumer of semantic projections and W
 - Timeline shows stored snapshot history and report links expose audit, semantic, and Watcher exports.
 - Dashboard data remains usable when registries are incomplete and is derived from local SQLite records.
 - Tests cover dashboard grouping, health classification, semantic rendering, and existing web endpoints.
+
+## Feature: Curator (Version 0.5)
+
+Curator is the canonical human-oriented organization projection over the Semantic Knowledge Foundation and Watcher evidence. It must remain rebuildable, read-only, and provenance-preserving.
+
+### Acceptance criteria
+
+- Area views organize devices and entities by registered area and expose `Unassigned` when area data is absent.
+- Human concepts are deterministic groupings layered above Home Assistant domains and labels.
+- Explicit relationships are navigable in both dependency directions and retain source evidence and confidence.
+- Watcher findings include likely cause, impact, dependencies, recommended read-only repair guidance, confidence, evidence, and provenance.
+- Curator data is available in Ingress and as a machine-readable JSON export.
+- Missing configuration or registry data degrades to unknown rather than inferred dependencies.
+- Tests cover area grouping, concepts, relationship extraction, actionable finding enrichment, export routes, and empty-state behavior.
+
+### Non-goals
+
+- Home Assistant writes, automatic repair, YAML generation, AI reasoning, notifications, or a replacement source of truth.

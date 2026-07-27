@@ -18,6 +18,7 @@ from fastapi.templating import Jinja2Templates
 from archivist.api.home_assistant import HomeAssistantClient
 from archivist.collector.service import Collector
 from archivist.config import Settings
+from archivist.curator.service import CuratorBuilder
 from archivist.dashboard.service import DashboardBuilder
 from archivist.logging import configure_logging
 from archivist.storage.database import Database
@@ -81,9 +82,10 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
         dashboard = DashboardBuilder().build(
             latest_bundle, current_database.list_snapshots(), current_database.list_findings()
         )
+        curator = CuratorBuilder().build(latest_bundle, current_database.list_findings())
         return templates.TemplateResponse(
             request=request, name="index.html",
-            context={"latest": latest, "findings": findings, "dashboard": dashboard},
+            context={"latest": latest, "findings": findings, "dashboard": dashboard, "curator": curator},
         )
 
     @application.post("/snapshot")
@@ -120,6 +122,28 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
             media_type="application/json",
             headers={"Content-Disposition": f"attachment; filename=semantic-{snapshot_id}.json"},
         )
+
+    def curator_bundle(snapshot_id: int) -> JSONResponse | Response:
+        bundle = current_database.get_snapshot(snapshot_id)
+        if bundle is None:
+            return JSONResponse({"error": "Snapshot not found"}, status_code=404)
+        projection = CuratorBuilder().build(bundle, current_database.list_findings())
+        return Response(
+            json.dumps(projection, indent=2),
+            media_type="application/json",
+            headers={"Content-Disposition": f"attachment; filename=curator-{snapshot_id}.json"},
+        )
+
+    @application.get("/curator/latest.json")
+    async def curator_latest() -> Response:
+        latest_snapshot = current_database.latest_snapshot()
+        if latest_snapshot is None:
+            return JSONResponse({"error": "Snapshot not found"}, status_code=404)
+        return curator_bundle(latest_snapshot.id)
+
+    @application.get("/curator/{snapshot_id}.json")
+    async def curator_download(snapshot_id: int) -> Response:
+        return curator_bundle(snapshot_id)
 
     @application.get("/watcher/findings")
     async def watcher_findings() -> JSONResponse:

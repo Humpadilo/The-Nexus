@@ -50,7 +50,7 @@ Implemented in Version 0.4 as the read-only presentation consumer of Semantic Kn
 
 ### Curator — Organizer
 
-Planned Version 0.5 module. Organizes and presents canonical semantic facts instead of creating competing interpretations of raw Home Assistant payloads.
+Implemented in Version 0.5. Organizes semantic facts, explicit snapshot references, and Watcher findings around areas, human concepts, relationships, and read-only health context. It does not create a competing source of truth.
 
 ### Oracle — Reasoning
 
