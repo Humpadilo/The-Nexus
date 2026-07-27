@@ -126,7 +126,7 @@ Users can understand what belongs to an area and which known objects depend on o
 
 ## v0.6 — Raven Diagnostics
 
-Status: complete and verified as `v0.6.0-verified`.
+Status: Raven diagnosis is verified as `v0.6.0-verified`; the bounded House Mode repair review is implemented and awaits explicit production approval.
 
 ### Goals
 

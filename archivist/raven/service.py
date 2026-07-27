@@ -29,8 +29,8 @@ class RavenInvestigator:
         selected = self._select_target(target, entities)
         references: list[dict[str, Any]] = []
         for source, config in configurations.items():
-            for reference in sorted(self._references(config)):
-                references.append(self._edge(source, reference, entities, entity_registry, devices, snapshot["id"]))
+            for reference, path in sorted(self._reference_locations(config)):
+                references.append(self._edge(source, reference, entities, entity_registry, devices, snapshot["id"], path))
 
         incoming = defaultdict(list)
         for edge in references:
@@ -57,6 +57,7 @@ class RavenInvestigator:
                 "snapshot_id": snapshot["id"],
                 "captured_at": snapshot.get("captured_at"),
                 "configuration_entities": sorted(configurations),
+                "entity_ids": sorted(entities),
                 "read_only": True,
             },
         }
@@ -79,24 +80,31 @@ class RavenInvestigator:
         return sorted(candidates)[0] if candidates else None
 
     @staticmethod
-    def _references(value: Any, key: str | None = None) -> set[str]:
-        found: set[str] = set()
+    def _reference_locations(value: Any, path: tuple[str, ...] = ()) -> set[tuple[str, tuple[str, ...]]]:
+        found: set[tuple[str, tuple[str, ...]]] = set()
         if isinstance(value, str):
-            if key in {"entity_id", "entity_ids"}:
-                found.update(ENTITY_REFERENCE.findall(value))
+            found.update((reference, path) for reference in ENTITY_REFERENCE.findall(value))
         elif isinstance(value, dict):
             for nested_key, nested in value.items():
                 normalized_key = str(nested_key).lower()
                 if normalized_key in {"service", "action"} and isinstance(nested, str):
                     continue
-                found.update(RavenInvestigator._references(nested, normalized_key))
+                if normalized_key in {"entity_id", "entity_ids"}:
+                    found.update(RavenInvestigator._reference_locations(nested, path + (normalized_key,)))
+                elif normalized_key not in {"service", "action"} or not isinstance(nested, str):
+                    found.update(RavenInvestigator._reference_locations(nested, path + (normalized_key,)))
         elif isinstance(value, (list, tuple, set)):
-            for nested in value:
-                found.update(RavenInvestigator._references(nested, key))
+            for index, nested in enumerate(value):
+                found.update(RavenInvestigator._reference_locations(nested, path + (str(index),)))
         return found
 
     @staticmethod
-    def _edge(source: str, target: str, entities: dict[str, dict[str, Any]], registry: dict[str, dict[str, Any]], devices: dict[str, dict[str, Any]], snapshot_id: int) -> dict[str, Any]:
+    def _references(value: Any) -> set[str]:
+        """Return entity references for compatibility with callers and tests."""
+        return {reference for reference, _ in RavenInvestigator._reference_locations(value)}
+
+    @staticmethod
+    def _edge(source: str, target: str, entities: dict[str, dict[str, Any]], registry: dict[str, dict[str, Any]], devices: dict[str, dict[str, Any]], snapshot_id: int, path: tuple[str, ...]) -> dict[str, Any]:
         if target in entities:
             state = entities[target].get("state", "unknown")
             relation = "references"
@@ -107,6 +115,7 @@ class RavenInvestigator:
         return {
             "source": source,
             "target": target,
+            "path": list(path),
             "relation": relation,
             "target_health": health,
             "confidence": "high" if target in entities else "high",

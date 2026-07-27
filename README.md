@@ -10,7 +10,7 @@ The Ingress page now includes Raven, a read-only diagnostic layer that investiga
 
 Watcher checks run daily by default. The Home Assistant app options `schedule_enabled`, `schedule_interval_hours`, and `finding_retention_days` control local scheduling and resolved-finding retention. Semantic projections are rebuildable from stored Home Assistant state and registry data; raw snapshots remain authoritative. All behavior remains read-only.
 
-The current architecture includes implemented modules `Archivist`, `Watcher`, `Semantic Layer`, `Dashboard / Nexus Experience`, `Curator`, and `Raven`. Planned modules are `Planner`, `Engineer`, `Oracle`, and `Tracy`. AI analysis and automatic repair are intentionally out of scope for the current release.
+The current architecture includes implemented modules `Archivist`, `Watcher`, `Semantic Layer`, `Dashboard / Nexus Experience`, `Curator`, and `Raven`, plus the first bounded Engineer proposal workflow. Planned modules are `Planner`, `Oracle`, and `Tracy`. Broad AI analysis and automatic repair remain out of scope; this workflow cannot write production without explicit approval.
 
 ## Home Assistant OS installation
 

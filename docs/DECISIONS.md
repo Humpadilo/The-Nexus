@@ -129,3 +129,13 @@ Define Concierge as a presentation/interface role rather than a core intelligenc
 **Boundaries:** Raven must not call Home Assistant services, write configuration, read protected files, perform automatic repair, or invent relationships when configuration evidence is unavailable. Configuration reads are evidence attached to an investigation, not a replacement source of truth. Planner, Engineer, Oracle, and Tracy remain outside Sprint 6.
 
 **Consequences:** Raven can diagnose broken references, unavailable dependencies, likely renamed entities, orphaned helpers, missing area assignments, and explicit execution paths. Some failures will remain undiagnosable when Home Assistant does not expose the relevant configuration or execution evidence; Raven must report that limitation explicitly.
+
+## ADR-012 — First repair workflow is bounded and approval-gated
+
+**Context:** Raven can identify the real House Mode failure, but diagnosis alone leaves the user to manually translate evidence into a production edit. A general repair engine would exceed the current product boundary.
+
+**Decision:** Implement one bounded Engineer workflow for a verified House Mode entity-reference replacement in UI-managed automation configuration. The proposal must contain before-and-after values, exact configuration paths, affected objects, evidence, confidence, risk, rollback, and validation steps. Applying it requires explicit human confirmation and reloads only the affected Home Assistant domain.
+
+**Boundaries:** Raven remains read-only and owns diagnosis. Engineer owns proposal preparation and the explicitly approved application path. No YAML editing, broad autonomous repair, silent approval, unrelated object changes, or production write occurs outside the recorded proposal.
+
+**Consequences:** The first repair path is intentionally narrow and reversible. It establishes the approval and audit contract for later Engineer work without making Engineer a general-purpose mutation system.

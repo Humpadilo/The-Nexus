@@ -62,6 +62,32 @@ class HomeAssistantClient:
                 continue
         return configurations
 
+    async def save_configuration(self, domain: str, object_id: str, configuration: dict[str, Any]) -> dict[str, Any]:
+        """Persist one UI-managed configuration after an explicit approval."""
+        if domain not in {"automation", "script", "scene"}:
+            raise HomeAssistantApiError(f"unsupported configuration domain: {domain}")
+        try:
+            async with aiohttp.ClientSession(timeout=self.timeout, headers=self.headers) as session:
+                async with session.post(f"{self.rest_url}/config/{domain}/config/{object_id}", json=configuration) as response:
+                    if response.status != 200:
+                        raise HomeAssistantApiError(f"{domain} configuration save returned HTTP {response.status}")
+                    payload = await response.json()
+                    return payload if isinstance(payload, dict) else {"value": payload}
+        except (aiohttp.ClientError, asyncio.TimeoutError) as exc:
+            raise HomeAssistantApiError(str(exc)) from exc
+
+    async def reload_domain(self, domain: str) -> None:
+        """Reload only the approved Home Assistant domain."""
+        if domain not in {"automation", "script", "scene"}:
+            raise HomeAssistantApiError(f"unsupported reload domain: {domain}")
+        try:
+            async with aiohttp.ClientSession(timeout=self.timeout, headers=self.headers) as session:
+                async with session.post(f"{self.rest_url}/services/{domain}/reload", json={}) as response:
+                    if response.status not in {200, 201}:
+                        raise HomeAssistantApiError(f"{domain} reload returned HTTP {response.status}")
+        except (aiohttp.ClientError, asyncio.TimeoutError) as exc:
+            raise HomeAssistantApiError(str(exc)) from exc
+
     async def websocket_command(self, command: str, **payload: Any) -> list[dict[str, Any]]:
         if not self.token:
             raise HomeAssistantApiError("SUPERVISOR_TOKEN is not configured")

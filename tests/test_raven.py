@@ -1,4 +1,5 @@
 from archivist.raven.service import RavenInvestigator
+from archivist.engineer.service import EngineerProposalBuilder
 
 
 def test_raven_traces_house_mode_and_identifies_broken_reference() -> None:
@@ -41,3 +42,31 @@ def test_raven_reports_orphaned_house_mode_helper() -> None:
 
     assert diagnosis["status"] == "diagnosed"
     assert diagnosis["findings"][0]["category"] == "orphaned_helper"
+
+
+def test_engineer_builds_bounded_house_mode_rename_proposal() -> None:
+    snapshot = {
+        "id": 14,
+        "entities": [
+            {"entity_id": "input_select.house_mode", "state": "Morning", "attributes": {}},
+            {"entity_id": "media_player.bedroom_matts_room", "state": "idle", "attributes": {}},
+        ],
+        "registries": {"entities": [{"entity_id": "input_select.house_mode", "area_id": "kitchen"}], "devices": [], "areas": []},
+    }
+    configurations = {
+        "automation.work_day_wakeup_2": {
+            "id": "work_day_wakeup_2",
+            "action": [{"target": {"entity_id": "media_player.matts_room"}}],
+        }
+    }
+    diagnosis = RavenInvestigator().investigate(snapshot, configurations, "input_select.house_mode")
+    proposal = EngineerProposalBuilder().build_house_mode_proposal(diagnosis, configurations)
+
+    assert proposal is not None
+    assert proposal["intended_entity"] == "media_player.bedroom_matts_room"
+    assert proposal["proposed_changes"][0]["before"] == "media_player.matts_room"
+    assert proposal["proposed_changes"][0]["after"] == "media_player.bedroom_matts_room"
+    updated = EngineerProposalBuilder.apply_entity_replacements(configurations["automation.work_day_wakeup_2"], proposal["proposed_changes"])
+    assert updated["action"][0]["target"]["entity_id"] == "media_player.bedroom_matts_room"
+    restored = EngineerProposalBuilder.apply_entity_replacements(updated, proposal["proposed_changes"], rollback=True)
+    assert restored == configurations["automation.work_day_wakeup_2"]

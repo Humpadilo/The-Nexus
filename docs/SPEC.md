@@ -248,4 +248,8 @@ Raven investigates a selected Home Assistant control using stored snapshot evide
 
 - A real Home Assistant issue can be investigated without manually tracing its configuration.
 - The resulting diagnosis identifies the strongest evidence-backed root cause or clearly reports that no fault was found.
+
+## Feature: Bounded House Mode Repair Review
+
+Engineer may prepare a repair proposal from a Raven diagnosis when a single high-confidence renamed entity is established for `input_select.house_mode`. The proposal includes exact configuration paths, before-and-after values, affected objects, dependent automations, evidence, confidence, risks, rollback, and validation steps. Review is shown in Ingress with explicit Approve and Cancel actions. Approval requires an exact confirmation phrase, applies only the recorded replacement, reloads only the affected domain, and records repair audit events. No production write occurs before approval.
 - Tests cover dependency tracing, broken references, unavailable dependencies, orphaned helpers, persistence, exports, and empty evidence.

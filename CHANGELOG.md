@@ -7,6 +7,8 @@
 - Verified on Home Assistant OS: Version 0.6.0 installed and running, Ingress loaded, 437 entities collected (20 unavailable, 119 unknown), and 142 active Watcher findings persisted.
 - Raven diagnosed the real `input_select.house_mode` control across 13 configuration sources with a high-confidence broken reference and a read-only repair recommendation.
 - Local suite: 18 tests passed; release verification tag: `v0.6.0-verified`.
+- Added the first bounded Engineer proposal flow for a House Mode entity-reference replacement, including exact paths, evidence, confidence, risk, rollback, validation, approval, cancellation, and repair audit records.
+- No production repair has been applied; the workflow is awaiting explicit approval.
 
 ## 0.5.0 - 2026-07-26
 

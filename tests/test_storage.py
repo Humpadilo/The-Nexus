@@ -61,3 +61,14 @@ def test_raven_diagnosis_persists_evidence(tmp_path: Path) -> None:
     stored = db.list_raven_diagnoses()
     assert diagnosis_id == stored[0]["id"]
     assert stored[0]["diagnosis"]["evidence"]["read_only"] is True
+
+
+def test_engineer_proposal_and_repair_audit_persist(tmp_path: Path) -> None:
+    db = Database(tmp_path / "archivist.db")
+    proposal = {"target": "input_select.house_mode", "status": "proposed", "kind": "house_mode_entity_reference_repair"}
+    proposal_id = db.save_engineer_proposal(proposal, diagnosis_id=1)
+
+    stored = db.get_engineer_proposal(proposal_id)
+    assert stored is not None
+    assert stored["status"] == "proposed"
+    assert db.list_repair_audit(proposal_id)[0]["event"] == "proposal_created"

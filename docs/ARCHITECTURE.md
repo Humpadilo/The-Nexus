@@ -47,13 +47,13 @@ The approved module model separates implemented runtime capabilities from future
 | Dashboard / Nexus Experience | Presents current observations, health, history, reports, and navigation. | Implemented through the FastAPI Ingress application. |
 | Curator | Organizes knowledge into areas, relationships, human concepts, and health context people can understand. | Implemented as a read-only projection over semantic and Watcher data. |
 | Raven | Investigates selected controls and produces evidence-backed diagnoses and repair recommendations. | Implemented as a read-only diagnostic layer. |
+| Engineer | Produces bounded repair proposals and applies only explicitly approved changes. | First bounded House Mode workflow implemented; never silently modifies production. |
 
 ### Planned
 
 | Module | Responsibility | Boundary |
 |---|---|---|
 | Planner | Creates recommended plans and workflows. | Produces proposals, not production changes. |
-| Engineer | Produces implementation plans and repair proposals. | Never silently modifies production. |
 | Oracle | Predicts future states and identifies emerging issues. | Must explain uncertainty and evidence. |
 | Tracy | Provides conversational intelligence, coordinates modules, and translates technical information into natural language. | Never bypasses the Observe → Recommend → Approve → Apply philosophy. |
 

@@ -92,6 +92,24 @@ class Database:
                     diagnosis_json TEXT NOT NULL
                 );
                 CREATE INDEX IF NOT EXISTS idx_raven_created_at ON raven_diagnoses(created_at);
+                CREATE TABLE IF NOT EXISTS engineer_proposals (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    created_at TEXT NOT NULL,
+                    diagnosis_id INTEGER,
+                    target TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    proposal_json TEXT NOT NULL,
+                    approved_at TEXT,
+                    applied_at TEXT
+                );
+                CREATE INDEX IF NOT EXISTS idx_engineer_proposal_status ON engineer_proposals(status);
+                CREATE TABLE IF NOT EXISTS repair_audit (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    created_at TEXT NOT NULL,
+                    proposal_id INTEGER NOT NULL,
+                    event TEXT NOT NULL,
+                    details_json TEXT NOT NULL
+                );
             """)
             conn.execute("PRAGMA user_version = 4")
 
@@ -180,6 +198,55 @@ class Database:
         with self._connect() as conn:
             rows = conn.execute("SELECT id, created_at, snapshot_id, target, status, diagnosis_json FROM raven_diagnoses ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
         return [{"id": row["id"], "created_at": row["created_at"], "snapshot_id": row["snapshot_id"], "target": row["target"], "status": row["status"], "diagnosis": json.loads(row["diagnosis_json"])} for row in rows]
+
+    def save_engineer_proposal(self, proposal: dict[str, Any], diagnosis_id: int | None = None) -> int:
+        with self._connect() as conn:
+            cursor = conn.execute(
+                "INSERT INTO engineer_proposals (created_at, diagnosis_id, target, status, proposal_json) VALUES (?, ?, ?, ?, ?)",
+                (datetime.now(UTC).isoformat(), diagnosis_id, proposal["target"], proposal["status"], json.dumps(proposal)),
+            )
+            proposal_id = int(cursor.lastrowid)
+            conn.execute(
+                "INSERT INTO repair_audit (created_at, proposal_id, event, details_json) VALUES (?, ?, ?, ?)",
+                (datetime.now(UTC).isoformat(), proposal_id, "proposal_created", json.dumps({"read_only": True})),
+            )
+        return proposal_id
+
+    def get_engineer_proposal(self, proposal_id: int) -> dict[str, Any] | None:
+        with self._connect() as conn:
+            row = conn.execute("SELECT * FROM engineer_proposals WHERE id = ?", (proposal_id,)).fetchone()
+        if row is None:
+            return None
+        proposal = json.loads(row["proposal_json"])
+        proposal.update({"id": row["id"], "created_at": row["created_at"], "diagnosis_id": row["diagnosis_id"], "status": row["status"]})
+        return proposal
+
+    def list_engineer_proposals(self, limit: int = 10) -> list[dict[str, Any]]:
+        with self._connect() as conn:
+            rows = conn.execute("SELECT * FROM engineer_proposals ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
+        result = []
+        for row in rows:
+            proposal = json.loads(row["proposal_json"])
+            proposal.update({"id": row["id"], "created_at": row["created_at"], "diagnosis_id": row["diagnosis_id"], "status": row["status"]})
+            result.append(proposal)
+        return result
+
+    def update_engineer_proposal(self, proposal_id: int, status: str, event: str, details: dict[str, Any] | None = None) -> None:
+        timestamp = datetime.now(UTC).isoformat()
+        with self._connect() as conn:
+            conn.execute("UPDATE engineer_proposals SET status = ?, approved_at = CASE WHEN ? = 'approved' THEN ? ELSE approved_at END, applied_at = CASE WHEN ? = 'applied' THEN ? ELSE applied_at END WHERE id = ?", (status, status, timestamp, status, timestamp, proposal_id))
+            conn.execute("INSERT INTO repair_audit (created_at, proposal_id, event, details_json) VALUES (?, ?, ?, ?)", (timestamp, proposal_id, event, json.dumps(details or {})))
+
+    def list_repair_audit(self, proposal_id: int | None = None) -> list[dict[str, Any]]:
+        query = "SELECT * FROM repair_audit"
+        params: tuple[Any, ...] = ()
+        if proposal_id is not None:
+            query += " WHERE proposal_id = ?"
+            params = (proposal_id,)
+        query += " ORDER BY id DESC"
+        with self._connect() as conn:
+            rows = conn.execute(query, params).fetchall()
+        return [{"id": row["id"], "created_at": row["created_at"], "proposal_id": row["proposal_id"], "event": row["event"], "details": json.loads(row["details_json"])} for row in rows]
 
     def latest_snapshot(self) -> Snapshot | None:
         with self._connect() as conn:

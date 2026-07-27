@@ -64,9 +64,9 @@ Future module. Predicts future states and identifies emerging issues. It must ex
 
 Future module. Creates recommended plans and workflows. Plans remain proposals until explicitly approved.
 
-### Engineer — Implementation planning
+### Engineer — Bounded implementation
 
-Future module. Produces implementation plans and repair proposals. It must never silently modify production.
+The first bounded workflow is implemented. Engineer turns Raven evidence into a House Mode repair proposal with exact before-and-after values, risks, rollback, and validation steps. Production application requires explicit approval, is limited to the recorded UI-managed automation objects, reloads only the affected domain, and records an audit event.
 
 ### Tracy — Intelligence and orchestration
 
