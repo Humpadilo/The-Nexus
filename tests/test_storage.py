@@ -72,3 +72,13 @@ def test_engineer_proposal_and_repair_audit_persist(tmp_path: Path) -> None:
     assert stored is not None
     assert stored["status"] == "proposed"
     assert db.list_repair_audit(proposal_id)[0]["event"] == "proposal_created"
+
+
+def test_raven_diagnosis_lifecycle_can_be_updated(tmp_path: Path) -> None:
+    db = Database(tmp_path / "archivist.db")
+    snapshot_id = db.save_snapshot({"total_entities": 0, "unavailable_entities": 0, "unknown_entities": 0, "disabled_or_unavailable_automations": 0, "low_battery_entities": 0}, [], {})
+    diagnosis = {"snapshot_id": snapshot_id, "target": "input_select.house_mode", "status": "diagnosed", "lifecycle": "Root Cause Identified"}
+    diagnosis_id = db.save_raven_diagnosis(diagnosis)
+    diagnosis["lifecycle"] = "Restoration Proposed"
+    db.update_raven_diagnosis(diagnosis_id, diagnosis)
+    assert db.list_raven_diagnoses()[0]["diagnosis"]["lifecycle"] == "Restoration Proposed"

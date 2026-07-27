@@ -39,7 +39,9 @@ class RavenInvestigator:
         scoped_edges = [edge for edge in references if edge["source"] in relevant or edge["target"] == selected]
         findings = self._findings(selected, entities, entity_registry, devices, scoped_edges, incoming, configurations, snapshot["id"])
         root_cause = self._root_cause(findings)
-        diagnosis = self._diagnosis(selected, entities, configurations, findings, root_cause)
+        findings = self._prioritize(findings)
+        human = self._human_sections(selected, entities, configurations, findings, root_cause)
+        diagnosis = human["diagnosis"]
         return {
             "schema_version": 1,
             "investigation_id": f"raven-{snapshot['id']}-{selected or 'unknown'}",
@@ -47,9 +49,14 @@ class RavenInvestigator:
             "target": selected,
             "target_requested": target,
             "status": "diagnosed" if findings else "no_fault_found",
+            "lifecycle": "Root Cause Identified" if root_cause else "Observed",
             "root_cause": root_cause,
             "diagnosis": diagnosis,
-            "repair_recommendation": self._repair_recommendation(root_cause, findings),
+            "what_happened": human["what_happened"],
+            "why_it_happened": human["why_it_happened"],
+            "restoration_plan": human["restoration_plan"],
+            "validation_steps": human["validation_steps"],
+            "repair_recommendation": human["restoration_plan"][0] if human["restoration_plan"] else "Collect another snapshot before proposing restoration.",
             "findings": findings,
             "execution_paths": scoped_edges,
             "configuration_sources": sorted(configurations),
@@ -150,10 +157,59 @@ class RavenInvestigator:
 
     @staticmethod
     def _finding(category: str, title: str, target: str, description: str, severity: str, confidence: str, edge: dict[str, Any], snapshot_id: int, suggestion: str | None = None) -> dict[str, Any]:
-        result = {"category": category, "title": title, "target": target, "description": description, "severity": severity, "confidence": confidence, "evidence": {"snapshot_id": snapshot_id, "source": edge["source"], "target": target, "provenance": edge["provenance"]}}
+        result = {"category": category, "title": title, "target": target, "description": description, "human_description": RavenInvestigator._human_finding(category, target, edge["source"]), "impact": RavenInvestigator._impact(category), "severity": severity, "confidence": confidence, "evidence": {"snapshot_id": snapshot_id, "source": edge["source"], "target": target, "path": edge.get("path", []), "provenance": edge["provenance"]}}
         if suggestion:
             result["possible_rename"] = suggestion
         return result
+
+    @staticmethod
+    def _human_finding(category: str, target: str, source: str) -> str:
+        if category == "broken_reference":
+            return f"{source} tries to use {target}, but that object is no longer available under that name."
+        if category == "unavailable_dependency":
+            return f"{source} depends on {target}, which is currently unavailable or unknown."
+        return f"{source} has a dependency that needs review: {target}."
+
+    @staticmethod
+    def _impact(category: str) -> str:
+        return {
+            "broken_reference": "The affected automation path may stop before completing its action.",
+            "unavailable_dependency": "The dependent behavior may be skipped or produce an incomplete result.",
+            "target_unhealthy": "The selected control may not accept or expose the expected state.",
+            "orphaned_helper": "The helper has no known dependent behavior in the collected evidence.",
+            "missing_area_assignment": "The object is harder to locate in human-centered navigation.",
+        }.get(category, "The effect should be confirmed against the related configuration.")
+
+    @staticmethod
+    def _prioritize(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        severity = {"critical": 0, "warning": 1, "informational": 2}
+        confidence = {"high": 0, "medium": 1, "low": 2}
+        category = {"broken_reference": 0, "target_unhealthy": 1, "unavailable_dependency": 2, "orphaned_helper": 3, "missing_area_assignment": 4}
+        return sorted(findings, key=lambda item: (severity.get(item.get("severity"), 9), category.get(item.get("category"), 9), confidence.get(item.get("confidence"), 9), item.get("target", "")))
+
+    @staticmethod
+    def _human_sections(selected: str | None, entities: dict[str, dict[str, Any]], configurations: dict[str, dict[str, Any]], findings: list[dict[str, Any]], root_cause: dict[str, Any] | None) -> dict[str, Any]:
+        target_name = selected or "the selected control"
+        if not findings:
+            happened = f"Raven observed {target_name}, but the available evidence does not show a current fault."
+            return {"diagnosis": happened, "what_happened": happened, "why_it_happened": "No likely cause was established from the collected evidence.", "restoration_plan": [], "validation_steps": ["Collect another snapshot if the behavior still appears incorrect."]}
+        happened = f"{target_name} has {len(findings)} evidence-backed issue(s) across {len(configurations)} related configuration source(s)."
+        causes = "; ".join(finding.get("human_description", finding["description"]) for finding in findings[:5])
+        plan = []
+        if root_cause:
+            if root_cause["category"] == "broken_reference":
+                replacement = next((item.get("possible_rename") for item in findings if item.get("possible_rename")), None)
+                plan.append(f"Replace the missing reference {root_cause['target']}" + (f" with {replacement} after confirming the match." if replacement else " after confirming the intended current object."))
+            elif root_cause["category"] == "unavailable_dependency":
+                plan.append(f"Restore or replace the unavailable dependency {root_cause['target']}, then retest the dependent behavior.")
+            elif root_cause["category"] == "orphaned_helper":
+                plan.append(f"Confirm whether {root_cause['target']} is intentionally unused before reconnecting or removing it.")
+            else:
+                plan.append("Review the selected object and its related configuration before making a change.")
+        if len(findings) > 1:
+            plan.append(f"Review the remaining {len(findings) - 1} related finding(s) in priority order before closing the investigation.")
+        validation = ["Run the affected control and its dependent automations.", "Collect a fresh snapshot and rerun Raven.", "Confirm that the original finding is resolved and no higher-severity dependent finding remains."]
+        return {"diagnosis": f"What happened: {happened} Why did it happen: {causes}", "what_happened": happened, "why_it_happened": causes, "restoration_plan": plan, "validation_steps": validation}
 
     @staticmethod
     def _rename_suggestion(target: str, entities: dict[str, dict[str, Any]]) -> str | None:

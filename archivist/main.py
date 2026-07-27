@@ -178,6 +178,9 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
             proposal_id = current_database.save_engineer_proposal(proposal, diagnosis_id) if proposal else None
             if proposal_id:
                 proposal["id"] = proposal_id
+                diagnosis["lifecycle"] = "Restoration Proposed"
+                diagnosis["restoration_proposal_id"] = proposal_id
+                current_database.update_raven_diagnosis(diagnosis_id, diagnosis)
             return JSONResponse({"diagnosis_id": diagnosis_id, "diagnosis": diagnosis, "repair_proposal": proposal})
         except Exception:
             logger.exception("raven_investigation_failed")

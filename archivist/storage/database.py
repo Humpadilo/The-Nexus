@@ -194,6 +194,13 @@ class Database:
             )
         return int(cursor.lastrowid)
 
+    def update_raven_diagnosis(self, diagnosis_id: int, diagnosis: dict[str, Any]) -> None:
+        with self._connect() as conn:
+            conn.execute(
+                "UPDATE raven_diagnoses SET target = ?, status = ?, diagnosis_json = ? WHERE id = ?",
+                (diagnosis.get("target"), diagnosis["status"], json.dumps(diagnosis), diagnosis_id),
+            )
+
     def list_raven_diagnoses(self, limit: int = 20) -> list[dict[str, Any]]:
         with self._connect() as conn:
             rows = conn.execute("SELECT id, created_at, snapshot_id, target, status, diagnosis_json FROM raven_diagnoses ORDER BY id DESC LIMIT ?", (limit,)).fetchall()

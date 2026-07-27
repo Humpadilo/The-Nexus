@@ -252,4 +252,8 @@ Raven investigates a selected Home Assistant control using stored snapshot evide
 ## Feature: Bounded House Mode Repair Review
 
 Engineer may prepare a repair proposal from a Raven diagnosis when a single high-confidence renamed entity is established for `input_select.house_mode`. The proposal includes exact configuration paths, before-and-after values, affected objects, dependent automations, evidence, confidence, risks, rollback, and validation steps. Review is shown in Ingress with explicit Approve and Cancel actions. Approval requires an exact confirmation phrase, applies only the recorded replacement, reloads only the affected domain, and records repair audit events. No production write occurs before approval.
+
+## Feature: Human-Centered Diagnosis (Sprint 7)
+
+Raven presents each investigation in this order: what happened, why it happened, what should be done, and how success will be verified. It preserves all simultaneous findings, prioritizes them by severity and confidence, records lifecycle state, and keeps technical paths available as evidence. This feature remains read-only and does not introduce autonomous repair or new constitutional runtime concepts.
 - Tests cover dependency tracing, broken references, unavailable dependencies, orphaned helpers, persistence, exports, and empty evidence.

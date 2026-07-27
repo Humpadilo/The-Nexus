@@ -24,6 +24,8 @@ Version 0.6 adds Raven as the read-only diagnostic layer. It may read UI-managed
 
 The bounded Engineer extension completed its live proposal review without applying a change: Raven identified `media_player.matts_room` in `automation.work_day_wakeup_2`, proposed `media_player.bedroom_matts_room` as the strongest evidence-backed replacement, and listed seven dependent House Mode automations. The proposal remains pending explicit approval; no Home Assistant write or reload has occurred.
 
+Sprint 7 adds human-centered Raven output and lifecycle state while preserving the Observe → Recommend → Approve → Apply boundary. It does not introduce Council, Tracy, or constitutional concepts into runtime behavior.
+
 ## Local-first assumption
 
 The Archivist runs as a Home Assistant app and continues operating without Codex or ChatGPT. This preserves local control and makes collection and reporting available even when development tools or cloud services are unavailable.

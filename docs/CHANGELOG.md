@@ -2,6 +2,13 @@
 
 This documentation changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The root [CHANGELOG.md](../CHANGELOG.md) remains the release-facing project history.
 
+## Unreleased — Sprint 7 Human-Centered Diagnosis
+
+- Added human-centered Raven sections for observed symptom, likely cause, restoration plan, and validation.
+- Preserved and prioritized multiple simultaneous findings and added investigation lifecycle state.
+- Improved Ingress repair review with expected effect and explicit validation guidance.
+- No autonomous repair or constitutional runtime terminology introduced.
+
 ## Unreleased — architecture documentation alignment
 
 - Synchronized repository documentation with the approved local-first Home Operating System architecture.

@@ -24,11 +24,15 @@ def test_raven_traces_house_mode_and_identifies_broken_reference() -> None:
     diagnosis = RavenInvestigator().investigate(snapshot, configurations, "input_select.house_mode")
 
     assert diagnosis["status"] == "diagnosed"
+    assert diagnosis["lifecycle"] == "Root Cause Identified"
     assert diagnosis["root_cause"]["category"] == "broken_reference"
     assert diagnosis["root_cause"]["target"] == "light.missing"
     assert all(edge["target"] != "light.turn_on" for edge in diagnosis["execution_paths"])
     assert diagnosis["execution_paths"][0]["source"] == "automation.house_mode"
     assert diagnosis["evidence"]["read_only"] is True
+    assert diagnosis["what_happened"]
+    assert diagnosis["why_it_happened"]
+    assert diagnosis["validation_steps"]
 
 
 def test_raven_reports_orphaned_house_mode_helper() -> None:

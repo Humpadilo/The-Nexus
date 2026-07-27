@@ -186,6 +186,19 @@ Sprint 3 is complete and verified. Sprint 4 implements The Nexus Dashboard as th
 - Engineer presented the exact before-and-after proposal, risks, rollback, and validation steps in Ingress.
 - No Home Assistant write or reload has occurred. The workflow is paused for explicit approval.
 
+## Sprint 7 — Human-Centered Diagnosis — in progress
+
+- [x] Add four-question human diagnosis output: what happened, why, restoration plan, and validation.
+- [x] Preserve and prioritize multiple simultaneous findings.
+- [x] Add investigation lifecycle state and restoration-proposal state.
+- [x] Present repair review evidence and validation steps in Ingress.
+- [x] Add tests for lifecycle, multiple findings, and human-centered output.
+- [ ] Complete live post-approval repair verification after explicit approval.
+
+### Sprint 7 boundary
+
+Sprint 7 remains read-only until Matt explicitly approves a bounded Engineer proposal. No Council, Tracy, or constitutional runtime concepts are introduced.
+
 ## Completed sprint history
 
 ### Sprint 0 — Project foundation
