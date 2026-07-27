@@ -9,6 +9,7 @@
 - Local suite: 18 tests passed; release verification tag: `v0.6.0-verified`.
 - Added the first bounded Engineer proposal flow for a House Mode entity-reference replacement, including exact paths, evidence, confidence, risk, rollback, validation, approval, cancellation, and repair audit records.
 - No production repair has been applied; the workflow is awaiting explicit approval.
+- Live proposal review identified `media_player.matts_room` in `automation.work_day_wakeup_2` and proposed `media_player.bedroom_matts_room` with high confidence. Production remains unchanged pending approval.
 
 ## 0.5.0 - 2026-07-26
 

@@ -22,6 +22,8 @@ Version 0.5 adds Curator as the read-only human organization layer. Live verific
 
 Version 0.6 adds Raven as the read-only diagnostic layer. It may read UI-managed automation, script, and scene configurations through Home Assistant's REST API for evidence-backed investigation; it does not read protected files or modify Home Assistant. Live verification installed Version 0.6.0 on Home Assistant OS, loaded Ingress, collected 437 entities (20 unavailable and 119 unknown), persisted 142 active findings, and diagnosed the real `input_select.house_mode` control through 13 configuration sources with a high-confidence broken reference. The local suite passed 18 tests, the diagnosis export was downloaded, and the verified release is tagged `v0.6.0-verified`.
 
+The bounded Engineer extension completed its live proposal review without applying a change: Raven identified `media_player.matts_room` in `automation.work_day_wakeup_2`, proposed `media_player.bedroom_matts_room` as the strongest evidence-backed replacement, and listed seven dependent House Mode automations. The proposal remains pending explicit approval; no Home Assistant write or reload has occurred.
+
 ## Local-first assumption
 
 The Archivist runs as a Home Assistant app and continues operating without Codex or ChatGPT. This preserves local control and makes collection and reporting available even when development tools or cloud services are unavailable.

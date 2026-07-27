@@ -178,6 +178,14 @@ Sprint 3 is complete and verified. Sprint 4 implements The Nexus Dashboard as th
 - Raven diagnoses persisted in SQLite and the JSON diagnosis export was downloaded from Ingress.
 - Release verification tag: `v0.6.0-verified`.
 
+### Bounded House Mode repair extension — awaiting approval
+
+- Live Raven identified the exact broken reference `media_player.matts_room` in `automation.work_day_wakeup_2`.
+- Evidence identifies `media_player.bedroom_matts_room` as the strongest current replacement candidate with high confidence.
+- Seven dependent House Mode automations were listed in the repair review.
+- Engineer presented the exact before-and-after proposal, risks, rollback, and validation steps in Ingress.
+- No Home Assistant write or reload has occurred. The workflow is paused for explicit approval.
+
 ## Completed sprint history
 
 ### Sprint 0 — Project foundation

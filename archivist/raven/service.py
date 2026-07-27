@@ -145,7 +145,7 @@ class RavenInvestigator:
             if selected.startswith(tuple(HELPER_DOMAINS)) and not incoming.get(selected):
                 findings.append({"category": "orphaned_helper", "title": "Helper has no known dependents", "target": selected, "description": "No collected automation, script, scene, or entity configuration references this helper.", "severity": "informational", "confidence": "medium", "evidence": {"snapshot_id": snapshot_id, "entity_id": selected}})
             if not (registry.get(selected) or {}).get("area_id"):
-                findings.append({"category": "missing_area_assignment", "title": "Selected target has no area assignment", "target": selected, "description": "The selected object is not assigned to an area in the entity registry.", "severity": "informational", "confidence": "high", "evidence": {"snapshot_id": snapshot_id, "entity_id": selected}})
+                findings.append({"category": "missing_area_assignment", "title": "Selected target has no area assignment", "target": selected, "description": "The selected object is not assigned to an area in the entity registry.", "severity": "informational", "confidence": "high", "evidence": {"snapshot_id": snapshot_id, "source": "entity_registry", "entity_id": selected}})
         return findings
 
     @staticmethod
