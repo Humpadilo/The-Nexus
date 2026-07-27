@@ -79,16 +79,20 @@ class RavenInvestigator:
         return sorted(candidates)[0] if candidates else None
 
     @staticmethod
-    def _references(value: Any) -> set[str]:
+    def _references(value: Any, key: str | None = None) -> set[str]:
         found: set[str] = set()
         if isinstance(value, str):
-            found.update(ENTITY_REFERENCE.findall(value))
+            if key in {"entity_id", "entity_ids"}:
+                found.update(ENTITY_REFERENCE.findall(value))
         elif isinstance(value, dict):
-            for nested in value.values():
-                found.update(RavenInvestigator._references(nested))
+            for nested_key, nested in value.items():
+                normalized_key = str(nested_key).lower()
+                if normalized_key in {"service", "action"} and isinstance(nested, str):
+                    continue
+                found.update(RavenInvestigator._references(nested, normalized_key))
         elif isinstance(value, (list, tuple, set)):
             for nested in value:
-                found.update(RavenInvestigator._references(nested))
+                found.update(RavenInvestigator._references(nested, key))
         return found
 
     @staticmethod
