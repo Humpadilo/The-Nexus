@@ -206,6 +206,13 @@ class Database:
             rows = conn.execute("SELECT id, created_at, snapshot_id, target, status, diagnosis_json FROM raven_diagnoses ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
         return [{"id": row["id"], "created_at": row["created_at"], "snapshot_id": row["snapshot_id"], "target": row["target"], "status": row["status"], "diagnosis": json.loads(row["diagnosis_json"])} for row in rows]
 
+    def get_raven_diagnosis(self, diagnosis_id: int) -> dict[str, Any] | None:
+        with self._connect() as conn:
+            row = conn.execute("SELECT id, created_at, snapshot_id, target, status, diagnosis_json FROM raven_diagnoses WHERE id = ?", (diagnosis_id,)).fetchone()
+        if row is None:
+            return None
+        return {"id": row["id"], "created_at": row["created_at"], "snapshot_id": row["snapshot_id"], "target": row["target"], "status": row["status"], "diagnosis": json.loads(row["diagnosis_json"])}
+
     def save_engineer_proposal(self, proposal: dict[str, Any], diagnosis_id: int | None = None) -> int:
         with self._connect() as conn:
             cursor = conn.execute(
@@ -222,10 +229,16 @@ class Database:
     def get_engineer_proposal(self, proposal_id: int) -> dict[str, Any] | None:
         with self._connect() as conn:
             row = conn.execute("SELECT * FROM engineer_proposals WHERE id = ?", (proposal_id,)).fetchone()
+            audit = conn.execute("SELECT event, details_json FROM repair_audit WHERE proposal_id = ? ORDER BY id DESC", (proposal_id,)).fetchall()
         if row is None:
             return None
         proposal = json.loads(row["proposal_json"])
         proposal.update({"id": row["id"], "created_at": row["created_at"], "diagnosis_id": row["diagnosis_id"], "status": row["status"]})
+        proposal["audit_events"] = [{"event": item["event"], "details": json.loads(item["details_json"])} for item in audit]
+        if proposal.get("status") == "applied" and not proposal.get("application_record"):
+            proposal["status"] = "proposed"
+            proposal["lifecycle"] = "Restoration Proposed"
+            proposal["integrity_warning"] = "This historical record has no explicit application record and is not treated as applied."
         return proposal
 
     def list_engineer_proposals(self, limit: int = 10) -> list[dict[str, Any]]:
@@ -235,6 +248,10 @@ class Database:
         for row in rows:
             proposal = json.loads(row["proposal_json"])
             proposal.update({"id": row["id"], "created_at": row["created_at"], "diagnosis_id": row["diagnosis_id"], "status": row["status"]})
+            if proposal.get("status") == "applied" and not proposal.get("application_record"):
+                proposal["status"] = "proposed"
+                proposal["lifecycle"] = "Restoration Proposed"
+                proposal["integrity_warning"] = "This historical record has no explicit application record and is not treated as applied."
             result.append(proposal)
         return result
 

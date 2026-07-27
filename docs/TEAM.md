@@ -66,7 +66,7 @@ Future module. Creates recommended plans and workflows. Plans remain proposals u
 
 ### Engineer — Bounded implementation
 
-The first bounded workflow is implemented. Engineer turns Raven evidence into a House Mode repair proposal with exact before-and-after values, risks, rollback, and validation steps. Production application requires explicit approval, is limited to the recorded UI-managed automation objects, reloads only the affected domain, and records an audit event.
+The first bounded workflow is implemented. Engineer turns Raven evidence into a House Mode restoration proposal with exact before-and-after values, risks, rollback, and validation steps. In the current Sprint 7 runtime the proposal is explicitly read-only and remains `Restoration Proposed`; no production application or reload endpoint is available.
 
 ### Tracy — Intelligence and orchestration
 

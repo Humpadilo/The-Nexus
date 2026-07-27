@@ -86,7 +86,11 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
         )
         curator = CuratorBuilder().build(latest_bundle, current_database.list_findings())
         raven_diagnoses = current_database.list_raven_diagnoses(limit=5)
-        engineer_proposals = current_database.list_engineer_proposals(limit=5)
+        latest_diagnosis_id = raven_diagnoses[0]["id"] if raven_diagnoses else None
+        engineer_proposals = [
+            proposal for proposal in current_database.list_engineer_proposals(limit=20)
+            if proposal.get("diagnosis_id") == latest_diagnosis_id
+        ]
         return templates.TemplateResponse(
             request=request, name="index.html",
             context={"latest": latest, "findings": findings, "dashboard": dashboard, "curator": curator, "raven_diagnoses": raven_diagnoses, "engineer_proposals": engineer_proposals},
@@ -196,6 +200,10 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
         proposal = current_database.get_engineer_proposal(proposal_id)
         if proposal is None:
             return JSONResponse({"error": "Repair proposal not found"}, status_code=404)
+        diagnosis_id = proposal.get("diagnosis_id")
+        diagnosis = current_database.get_raven_diagnosis(int(diagnosis_id)) if diagnosis_id else None
+        if diagnosis is None or diagnosis["diagnosis"].get("investigation_id") != proposal.get("investigation_id"):
+            return JSONResponse({"error": "Restoration proposal is not linked to this investigation."}, status_code=409)
         return JSONResponse({"proposal": proposal, "audit": current_database.list_repair_audit(proposal_id)})
 
     @application.post("/engineer/proposals/{proposal_id}/cancel")
@@ -209,53 +217,11 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
         return JSONResponse({"proposal_id": proposal_id, "status": "cancelled"})
 
     @application.post("/engineer/proposals/{proposal_id}/approve")
-    async def approve_engineer_proposal(proposal_id: int, request: Request) -> JSONResponse:
+    async def approve_engineer_proposal(proposal_id: int) -> JSONResponse:
         proposal = current_database.get_engineer_proposal(proposal_id)
         if proposal is None:
             return JSONResponse({"error": "Repair proposal not found"}, status_code=404)
-        try:
-            body = await request.json()
-        except json.JSONDecodeError:
-            body = {}
-        if not isinstance(body, dict) or body.get("confirmation") != "APPROVE HOUSE MODE REPAIR":
-            return JSONResponse({"error": "Explicit confirmation is required."}, status_code=400)
-        if proposal["status"] != "proposed":
-            return JSONResponse({"error": f"Proposal is already {proposal['status']}"}, status_code=409)
-        client = HomeAssistantClient(current_settings.ha_rest_url, current_settings.ha_ws_url, current_settings.supervisor_token)
-        changes_by_object: dict[str, list[dict[str, object]]] = {}
-        for change in proposal["proposed_changes"]:
-            changes_by_object.setdefault(str(change["object"]), []).append(change)
-        applied: list[str] = []
-        original_configs: dict[str, dict[str, object]] = {}
-        try:
-            for object_id, changes in changes_by_object.items():
-                domain, _, config_id = object_id.partition(".")
-                configuration = next(change["configuration"] for change in changes)
-                original_configs[object_id] = configuration
-                updated = EngineerProposalBuilder.apply_entity_replacements(configuration, changes)
-                await client.save_configuration(domain, str(configuration.get("id", config_id)), updated)
-                applied.append(object_id)
-            domains = sorted({object_id.partition(".")[0] for object_id in applied})
-            for domain in domains:
-                await client.reload_domain(domain)
-            validation_snapshot = await collector().run()
-            validation_bundle = current_database.get_snapshot(validation_snapshot.snapshot_id)
-            validation_configs = await client.get_configurations(validation_bundle.get("entities", []) if validation_bundle else [])
-            validation = RavenInvestigator().investigate(validation_bundle, validation_configs, "input_select.house_mode") if validation_bundle else None
-            validation_id = current_database.save_raven_diagnosis(validation) if validation else None
-            current_database.update_engineer_proposal(proposal_id, "applied", "repair_applied", {"objects": applied, "domains_reloaded": domains, "validation_snapshot_id": validation_snapshot.snapshot_id, "validation_diagnosis_id": validation_id, "read_only": False})
-            return JSONResponse({"proposal_id": proposal_id, "status": "applied", "objects": applied, "validation": validation})
-        except Exception as exc:
-            logger.exception("engineer_repair_failed")
-            for object_id in applied:
-                try:
-                    domain, _, config_id = object_id.partition(".")
-                    original = original_configs[object_id]
-                    await client.save_configuration(domain, str(original.get("id", config_id)), original)
-                except Exception:
-                    logger.exception("engineer_repair_rollback_failed", extra={"object_id": object_id})
-            current_database.update_engineer_proposal(proposal_id, "failed", "repair_failed", {"objects_applied": applied, "error": str(exc)})
-            return JSONResponse({"error": "Repair failed; inspect the repair audit before retrying."}, status_code=502)
+        return JSONResponse({"error": "The Nexus is read-only. This proposal remains Restoration Proposed and cannot be applied.", "status": "Restoration Proposed", "read_only": True}, status_code=409)
 
     return application
 

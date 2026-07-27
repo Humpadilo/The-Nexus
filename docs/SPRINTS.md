@@ -186,14 +186,17 @@ Sprint 3 is complete and verified. Sprint 4 implements The Nexus Dashboard as th
 - Engineer presented the exact before-and-after proposal, risks, rollback, and validation steps in Ingress.
 - No Home Assistant write or reload has occurred. The workflow is paused for explicit approval.
 
-## Sprint 7 — Human-Centered Diagnosis — in progress
+## Sprint 7 — Human-Centered Diagnosis — implementation complete; live deployment pending
 
 - [x] Add four-question human diagnosis output: what happened, why, restoration plan, and validation.
 - [x] Preserve and prioritize multiple simultaneous findings.
 - [x] Add investigation lifecycle state and restoration-proposal state.
 - [x] Present repair review evidence and validation steps in Ingress.
 - [x] Add tests for lifecycle, multiple findings, and human-centered output.
-- [ ] Complete live post-approval repair verification after explicit approval.
+- [ ] Install and smoke-test the `0.7.0` image after Supervisor repository metadata is refreshed.
+- [x] Enforce investigation-to-proposal and finding identity links.
+- [x] Prevent stale or unrecorded proposals from appearing as Applied.
+- [x] Keep the current runtime read-only; no Home Assistant write or reload is exposed.
 
 ### Sprint 7 deployment correction
 
@@ -202,7 +205,11 @@ Sprint 3 is complete and verified. Sprint 4 implements The Nexus Dashboard as th
 
 ### Sprint 7 boundary
 
-Sprint 7 remains read-only until Matt explicitly approves a bounded Engineer proposal. No Council, Tracy, or constitutional runtime concepts are introduced.
+Sprint 7 remains read-only: proposals may be reviewed or cancelled, but the current runtime does not apply production changes. No Council, Tracy, or constitutional runtime concepts are introduced.
+
+### Sprint 7 deployment and integrity follow-up
+
+Repository evidence reports `0.7.0`, while the live Home Assistant app remained installed and running at `0.6.0` after Supervisor update/rebuild attempts. The remaining live action is a Supervisor app-store/repository refresh and must be approved before it is performed because it may restart the app or Home Assistant. No production repair was applied. Local regression coverage verifies distinct investigations, finding/proposal linkage, stale Applied-state normalization, and the hard read-only approval guard.
 
 ## Completed sprint history
 

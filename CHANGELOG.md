@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0 - Sprint 7 implementation pending live verification
+
+- Added human-centered Raven diagnosis with multiple findings, lifecycle state, restoration guidance, and explicit validation steps.
+- Added investigation/finding identity links and enforced read-only restoration proposals.
+- No Home Assistant write or reload is exposed; live Supervisor still reports `0.6.0`.
+
 ## 0.6.0 - 2026-07-27
 
 - Added Raven, a read-only diagnostic investigator for selected Home Assistant entities, helpers, automations, scripts, scenes, and concepts.

@@ -4,9 +4,9 @@ The Nexus is the long-term project name for a local-first Home Operating System.
 
 ## Current status
 
-Version `0.6.0` is the current verified release, with a bounded House Mode Engineer proposal workflow under active verification. Implemented modules include Archivist, Watcher, the Semantic Layer, Dashboard / Nexus Experience, Curator, Raven, and the bounded Engineer proposal path. The Home Assistant app provides Ingress, a FastAPI web interface, read-only collection, configuration-backed diagnosis, SQLite persistence, semantic projections, Watcher findings, Curator organization, JSON exports, structured logging, and tests.
+Version `0.6.0` is the current verified Home Assistant release. Sprint 7 implementation is version `0.7.0` in the repository but remains pending live Supervisor deployment verification. Implemented modules include Archivist, Watcher, the Semantic Layer, Dashboard / Nexus Experience, Curator, Raven, and the bounded Engineer proposal path. The current runtime keeps restoration proposals read-only: it does not apply production changes.
 
-The following are not implemented in this repository: Planner, Oracle, Tracy, broad AI analysis, YAML generation, SmartThings integration, house modes, occupancy intelligence, voice control, and unrelated production changes. The only Engineer path is the bounded, explicit-approval House Mode repair workflow.
+The following are not implemented in this repository: Planner, Oracle, Tracy, broad AI analysis, YAML generation, SmartThings integration, house modes, occupancy intelligence, voice control, and unrelated production changes. The only Engineer path is the bounded House Mode proposal workflow; application is intentionally unavailable in the read-only Sprint 7 runtime.
 
 ## Vision
 

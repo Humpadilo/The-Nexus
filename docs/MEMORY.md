@@ -26,6 +26,8 @@ The bounded Engineer extension completed its live proposal review without applyi
 
 Sprint 7 adds human-centered Raven output and lifecycle state while preserving the Observe → Recommend → Approve → Apply boundary. It does not introduce Council, Tracy, or constitutional concepts into runtime behavior.
 
+The Sprint 7 deployment and integrity follow-up found that the public repository advertises `0.7.0` while the live Supervisor app remained on `0.6.0` after update and rebuild attempts. This is a Supervisor repository/store refresh blocker, not an application data failure. The follow-up also established that every restoration proposal must carry its investigation ID and finding IDs, remain explicitly `Restoration Proposed`, and never display or report `Applied` without an application record. The current runtime has no production write or reload path.
+
 ## Local-first assumption
 
 The Archivist runs as a Home Assistant app and continues operating without Codex or ChatGPT. This preserves local control and makes collection and reporting available even when development tools or cloud services are unavailable.

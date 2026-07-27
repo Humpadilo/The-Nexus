@@ -9,6 +9,10 @@ This documentation changelog follows [Keep a Changelog](https://keepachangelog.c
 - Improved Ingress repair review with expected effect and explicit validation guidance.
 - Corrected dependency token parsing so numeric scene attribute keys such as `14.1` are not reported as entity IDs.
 - Bumped the app release to `0.7.0` so Home Assistant performs a fresh image build for the Sprint 7 runtime.
+- Added investigation and finding identifiers to restoration proposals and scoped proposal display to the active diagnosis.
+- Normalized legacy proposals without application records back to `Restoration Proposed` and removed the unreachable production-write path from the runtime endpoint.
+- Added regression coverage for multi-investigation isolation and read-only restoration integrity.
+- Live deployment remains blocked by the Home Assistant Supervisor repository/store retaining version `0.6.0` after update attempts.
 - No autonomous repair or constitutional runtime terminology introduced.
 
 ## Unreleased — architecture documentation alignment

@@ -126,7 +126,7 @@ Users can understand what belongs to an area and which known objects depend on o
 
 ## v0.6 — Raven Diagnostics
 
-Status: Raven diagnosis is verified as `v0.6.0-verified`; the bounded House Mode repair review is implemented and awaits explicit production approval.
+Status: Raven diagnosis is verified as `v0.6.0-verified`. Sprint 7 human-centered diagnosis is implemented locally as `0.7.0`, but live Home Assistant deployment remains pending Supervisor repository refresh; restoration proposals remain read-only and no repair has been applied.
 
 Sprint 7 extends Raven with human-centered diagnosis, multiple-finding prioritization, investigation lifecycle state, restoration guidance, and explicit validation steps. It does not add autonomous repair or new constitutional runtime concepts.
 

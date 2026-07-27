@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import re
+import uuid
+import hashlib
+import json
 from collections import defaultdict
 from difflib import SequenceMatcher
 from typing import Any
@@ -47,7 +50,7 @@ class RavenInvestigator:
         diagnosis = human["diagnosis"]
         return {
             "schema_version": 1,
-            "investigation_id": f"raven-{snapshot['id']}-{selected or 'unknown'}",
+            "investigation_id": f"raven-{uuid.uuid4().hex}",
             "snapshot_id": snapshot["id"],
             "target": selected,
             "target_requested": target,
@@ -151,19 +154,24 @@ class RavenInvestigator:
             item = entities[selected]
             state = str(item.get("state", "unknown"))
             if state in {"unavailable", "unknown"}:
-                findings.append({"category": "target_unhealthy", "title": "Selected target is not healthy", "target": selected, "description": f"The selected target reports {state} in snapshot {snapshot_id}.", "severity": "warning", "confidence": "high", "evidence": {"snapshot_id": snapshot_id, "entity_id": selected, "state": state}})
+                findings.append({"finding_id": self._finding_id("target_unhealthy", selected, snapshot_id), "category": "target_unhealthy", "title": "Selected target is not healthy", "target": selected, "description": f"The selected target reports {state} in snapshot {snapshot_id}.", "severity": "warning", "confidence": "high", "evidence": {"snapshot_id": snapshot_id, "entity_id": selected, "state": state}})
             if selected.startswith(tuple(HELPER_DOMAINS)) and not incoming.get(selected):
-                findings.append({"category": "orphaned_helper", "title": "Helper has no known dependents", "target": selected, "description": "No collected automation, script, scene, or entity configuration references this helper.", "severity": "informational", "confidence": "medium", "evidence": {"snapshot_id": snapshot_id, "entity_id": selected}})
+                findings.append({"finding_id": self._finding_id("orphaned_helper", selected, snapshot_id), "category": "orphaned_helper", "title": "Helper has no known dependents", "target": selected, "description": "No collected automation, script, scene, or entity configuration references this helper.", "severity": "informational", "confidence": "medium", "evidence": {"snapshot_id": snapshot_id, "entity_id": selected}})
             if not (registry.get(selected) or {}).get("area_id"):
-                findings.append({"category": "missing_area_assignment", "title": "Selected target has no area assignment", "target": selected, "description": "The selected object is not assigned to an area in the entity registry.", "severity": "informational", "confidence": "high", "evidence": {"snapshot_id": snapshot_id, "source": "entity_registry", "entity_id": selected}})
+                findings.append({"finding_id": self._finding_id("missing_area_assignment", selected, snapshot_id), "category": "missing_area_assignment", "title": "Selected target has no area assignment", "target": selected, "description": "The selected object is not assigned to an area in the entity registry.", "severity": "informational", "confidence": "high", "evidence": {"snapshot_id": snapshot_id, "source": "entity_registry", "entity_id": selected}})
         return findings
 
     @staticmethod
     def _finding(category: str, title: str, target: str, description: str, severity: str, confidence: str, edge: dict[str, Any], snapshot_id: int, suggestion: str | None = None) -> dict[str, Any]:
-        result = {"category": category, "title": title, "target": target, "description": description, "human_description": RavenInvestigator._human_finding(category, target, edge["source"]), "impact": RavenInvestigator._impact(category), "severity": severity, "confidence": confidence, "evidence": {"snapshot_id": snapshot_id, "source": edge["source"], "target": target, "path": edge.get("path", []), "provenance": edge["provenance"]}}
+        result = {"finding_id": RavenInvestigator._finding_id(category, target, snapshot_id, edge["source"], edge.get("path", [])), "category": category, "title": title, "target": target, "description": description, "human_description": RavenInvestigator._human_finding(category, target, edge["source"]), "impact": RavenInvestigator._impact(category), "severity": severity, "confidence": confidence, "evidence": {"snapshot_id": snapshot_id, "source": edge["source"], "target": target, "path": edge.get("path", []), "provenance": edge["provenance"]}}
         if suggestion:
             result["possible_rename"] = suggestion
         return result
+
+    @staticmethod
+    def _finding_id(category: str, target: str, snapshot_id: int, source: str = "", path: Any = ()) -> str:
+        raw = json.dumps([category, target, snapshot_id, source, list(path)], separators=(",", ":"))
+        return "finding-" + hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
 
     @staticmethod
     def _human_finding(category: str, target: str, source: str) -> str:
