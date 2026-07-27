@@ -68,7 +68,9 @@ class RavenInvestigator:
         if target and target.startswith("concept:"):
             term = target.removeprefix("concept:").replace("_", " ").lower()
             matches = [entity_id for entity_id, item in entities.items() if term in f"{entity_id} {(item.get('attributes') or {}).get('friendly_name', '')}".lower()]
-            return sorted(matches)[0] if matches else None
+            helper_domains = ("input_boolean.", "input_button.", "input_number.", "input_select.", "input_text.")
+            matches.sort(key=lambda entity_id: (0 if entity_id.startswith(helper_domains) else 1, entity_id))
+            return matches[0] if matches else None
         if target:
             normalized = target.lower()
             matches = [entity_id for entity_id, item in entities.items() if normalized in f"{entity_id} {(item.get('attributes') or {}).get('friendly_name', '')}".lower()]
