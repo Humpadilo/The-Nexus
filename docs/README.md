@@ -1,22 +1,22 @@
 # The Nexus Documentation
 
-The Nexus is the long-term project name for a local-first Home Assistant operating system. The repository currently contains the first working subsystem, **The Archivist**. The Nexus is the direction and shared vocabulary; The Archivist is the implementation that exists today.
+The Nexus is the long-term project name for a local-first Home Operating System. Home Assistant is the execution platform, while The Nexus is the product identity and shared architectural vocabulary.
 
 ## Current status
 
-Version `0.1.0` is the foundation release. It is a Home Assistant app with Ingress, a FastAPI web interface, a health endpoint, read-only Home Assistant REST and WebSocket collection, SQLite persistence, snapshot summaries, JSON audit bundles, structured logging, and unit tests.
+Version `0.6.0` is the current development release. Implemented modules include Archivist, Watcher, the Semantic Layer, Dashboard / Nexus Experience, Curator, and Raven. The Home Assistant app provides Ingress, a FastAPI web interface, read-only collection, configuration-backed diagnosis, SQLite persistence, semantic projections, Watcher findings, Curator organization, JSON exports, structured logging, and tests.
 
-The following are not implemented in this repository: AI analysis, automatic repair, YAML generation, approval workflows, monitoring, SmartThings integration, house modes, occupancy intelligence, voice control, and the future modules beyond the Archivist foundation.
+The following are not implemented in this repository: Planner, Engineer, Oracle, Tracy, AI analysis, automatic repair, YAML generation, approval workflows, SmartThings integration, house modes, occupancy intelligence, voice control, and production changes.
 
 ## Vision
 
 The Nexus should help a household understand and maintain its automation system while keeping control local, explicit, reversible, and understandable. The intended progression is:
 
 ```text
-Observe → Explain → Recommend → Approve → Apply → Verify
+Observe → Recommend → Approve → Apply
 ```
 
-Version 0.1 stops at observation and reporting.
+Version 0.6 stops at read-only diagnosis, organization, observation, reporting, and evidence-backed context.
 
 ## Goals
 
@@ -63,6 +63,7 @@ docs/            Project operating documentation
 - [MEMORY.md](MEMORY.md) — institutional memory and known assumptions
 - [DECISIONS.md](DECISIONS.md) — architecture decision records
 - [PARKING_LOT.md](PARKING_LOT.md) — ideas intentionally outside active work
+- [IDEA_INBOX.md](IDEA_INBOX.md) — uncommitted future concepts and their initial constraints
 - [CHANGELOG.md](CHANGELOG.md) — documentation history for the project
 - [Root README](../README.md) — installation and developer instructions
 - [Root CHANGELOG](../CHANGELOG.md) — release changelog

@@ -21,6 +21,7 @@ from archivist.config import Settings
 from archivist.curator.service import CuratorBuilder
 from archivist.dashboard.service import DashboardBuilder
 from archivist.logging import configure_logging
+from archivist.raven.service import RavenInvestigator
 from archivist.storage.database import Database
 from archivist.watcher.scheduler import WatcherScheduler
 
@@ -83,9 +84,10 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
             latest_bundle, current_database.list_snapshots(), current_database.list_findings()
         )
         curator = CuratorBuilder().build(latest_bundle, current_database.list_findings())
+        raven_diagnoses = current_database.list_raven_diagnoses(limit=5)
         return templates.TemplateResponse(
             request=request, name="index.html",
-            context={"latest": latest, "findings": findings, "dashboard": dashboard, "curator": curator},
+            context={"latest": latest, "findings": findings, "dashboard": dashboard, "curator": curator, "raven_diagnoses": raven_diagnoses},
         )
 
     @application.post("/snapshot")
@@ -153,6 +155,31 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
     async def watcher_findings_download() -> Response:
         payload = json.dumps({"findings": current_database.list_findings()}, indent=2)
         return Response(payload, media_type="application/json", headers={"Content-Disposition": "attachment; filename=watcher-findings.json"})
+
+    @application.post("/raven/investigate")
+    async def raven_investigate(request: Request) -> JSONResponse:
+        latest_snapshot = current_database.latest_snapshot()
+        if latest_snapshot is None:
+            return JSONResponse({"error": "Run a snapshot before investigating."}, status_code=409)
+        bundle = current_database.get_snapshot(latest_snapshot.id)
+        if bundle is None:
+            return JSONResponse({"error": "Snapshot not found"}, status_code=404)
+        try:
+            body = await request.json()
+            target = body.get("target") if isinstance(body, dict) else None
+            client = HomeAssistantClient(current_settings.ha_rest_url, current_settings.ha_ws_url, current_settings.supervisor_token)
+            configurations = await client.get_configurations(bundle.get("entities", []))
+            diagnosis = RavenInvestigator().investigate(bundle, configurations, target)
+            diagnosis_id = current_database.save_raven_diagnosis(diagnosis)
+            return JSONResponse({"diagnosis_id": diagnosis_id, "diagnosis": diagnosis})
+        except Exception:
+            logger.exception("raven_investigation_failed")
+            return JSONResponse({"error": "Raven investigation failed. Check the app logs."}, status_code=502)
+
+    @application.get("/raven/diagnoses.json")
+    async def raven_diagnoses_download() -> Response:
+        payload = json.dumps({"diagnoses": current_database.list_raven_diagnoses()}, indent=2)
+        return Response(payload, media_type="application/json", headers={"Content-Disposition": "attachment; filename=raven-diagnoses.json"})
 
     return application
 

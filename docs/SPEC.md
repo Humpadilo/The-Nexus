@@ -226,3 +226,26 @@ Curator is the canonical human-oriented organization projection over the Semanti
 ### Non-goals
 
 - Home Assistant writes, automatic repair, YAML generation, AI reasoning, notifications, or a replacement source of truth.
+
+## Feature: Raven Diagnostics (Version 0.6)
+
+Raven investigates a selected Home Assistant control using stored snapshot evidence and read-only API access to UI-managed automation, script, and scene configurations when available.
+
+### Requirements
+
+- Accept an entity, helper, automation, script, scene, or human concept as a target.
+- Trace explicit configuration references and execution-path edges.
+- Detect broken references, likely renamed entities, unavailable dependencies, orphaned helpers, and missing area assignments.
+- Preserve snapshot IDs, configuration sources, provenance, severity, confidence, and evidence for every finding.
+- Produce a human-readable diagnosis, likely root cause, and read-only repair recommendation.
+- Persist diagnoses in SQLite and provide machine-readable exports through Ingress.
+
+### Non-goals
+
+- Automatic repair, service calls, configuration writes, Planner, Engineer, Oracle, Tracy, or AI reasoning.
+
+### Acceptance criteria
+
+- A real Home Assistant issue can be investigated without manually tracing its configuration.
+- The resulting diagnosis identifies the strongest evidence-backed root cause or clearly reports that no fault was found.
+- Tests cover dependency tracing, broken references, unavailable dependencies, orphaned helpers, persistence, exports, and empty evidence.

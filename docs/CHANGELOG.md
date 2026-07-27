@@ -2,6 +2,25 @@
 
 This documentation changelog follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). The root [CHANGELOG.md](../CHANGELOG.md) remains the release-facing project history.
 
+## Unreleased — architecture documentation alignment
+
+- Synchronized repository documentation with the approved local-first Home Operating System architecture.
+- Distinguished implemented modules from planned Raven, Planner, Engineer, Oracle, and Tracy boundaries.
+- Clarified Tracy and the Interface Layer, including Concierge as a presentation role rather than a core intelligence component.
+- Updated module responsibilities, semantic-layer status, approval boundaries, and current project identity across the documentation set.
+
+## [0.6.0] - 2026-07-27
+
+### Added
+
+- Raven read-only diagnostic investigations using snapshot evidence and available Home Assistant automation, script, and scene configuration APIs.
+- Explicit dependency tracing, broken-reference detection, unavailable-dependency findings, orphaned-helper detection, diagnoses persistence, and JSON export.
+- Raven Ingress investigation controls and tests.
+
+### Scope
+
+- Raven produces evidence-backed diagnoses and repair recommendations only. It does not perform repairs or call Home Assistant services.
+
 ## [0.5.0] - 2026-07-26
 
 ### Added

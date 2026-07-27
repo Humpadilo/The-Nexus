@@ -18,6 +18,14 @@ class FakeClient:
     async def get_registries(self):
         return {"entities": [], "devices": [], "areas": []}
 
+    async def get_configurations(self, states):
+        return {
+            "automation.house_mode": {
+                "trigger": [{"platform": "state", "entity_id": "sensor.one"}],
+                "action": [{"service": "light.turn_on", "target": {"entity_id": "light.missing"}}],
+            }
+        }
+
 
 def test_health_and_ingress_page(tmp_path: Path) -> None:
     settings = Settings(data_dir=tmp_path)
@@ -64,6 +72,10 @@ def test_snapshot_and_audit_download(tmp_path: Path, monkeypatch) -> None:
     assert curator_download.headers["content-disposition"] == f"attachment; filename=curator-{snapshot_id}.json"
     assert curator_download.json()["summary"]["entity_count"] == 2
     assert client.get("/curator/latest.json").status_code == 200
+    raven = client.post("/raven/investigate", json={"target": "sensor.one"})
+    assert raven.status_code == 200
+    assert raven.json()["diagnosis"]["status"] == "diagnosed"
+    assert client.get("/raven/diagnoses.json").headers["content-disposition"] == "attachment; filename=raven-diagnoses.json"
     semantic_download = client.get(f"/semantic/{snapshot_id}.json")
     assert semantic_download.status_code == 200
     assert semantic_download.headers["content-disposition"] == f"attachment; filename=semantic-{snapshot_id}.json"

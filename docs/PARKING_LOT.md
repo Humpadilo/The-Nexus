@@ -40,7 +40,7 @@ These ideas are intentionally not part of the current sprint. Recording them pre
 
 ## Experimental
 
-- Laboratory simulation of proposed changes.
+- Simulation of proposed changes.
 - What-if testing for house modes.
 - Historical replay of state observations.
 

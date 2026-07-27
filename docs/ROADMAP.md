@@ -2,6 +2,8 @@
 
 This roadmap describes major versions, not a task backlog. Active work belongs in [SPRINTS.md](SPRINTS.md). Ideas that are not committed to a version belong in [PARKING_LOT.md](PARKING_LOT.md).
 
+The current approved architecture is documented in [ARCHITECTURE.md](ARCHITECTURE.md): Archivist, Watcher, Semantic Layer, Dashboard / Nexus Experience, Curator, and Raven are implemented; Planner, Engineer, Oracle, and Tracy are future module boundaries. This note records architecture alignment without changing the roadmap sequence.
+
 ## v0.1 — Foundation
 
 ### Goals
@@ -122,22 +124,22 @@ Turn semantic observations into a human-oriented map of the home and actionable,
 
 Users can understand what belongs to an area and which known objects depend on one another without inspecting raw JSON.
 
-## v0.6 — Health Reports
+## v0.6 — Raven Diagnostics
 
 ### Goals
 
-Introduce optional explanation and recommendation assistance.
+Investigate real Home Assistant failures using evidence-backed dependency and execution-path analysis.
 
 ### Expected features
 
-- Explicit recommendation objects.
-- Evidence attached to each recommendation.
-- Local operation when AI is unavailable.
+- User-selected entity, helper, automation, script, scene, or concept investigations.
+- Broken reference, renamed entity, unavailable dependency, orphaned helper, and missing-area detection.
+- Human-readable diagnoses, repair recommendations, and machine-readable evidence exports.
 - No automatic production writes.
 
 ### Success criteria
 
-Recommendations are optional, explainable, and never silently applied.
+Users can identify the likely root cause of a real issue without manually tracing the configuration.
 
 ## v0.7 — AI Recommendations
 
@@ -163,7 +165,7 @@ Test proposed changes before applying them.
 
 ### Expected features
 
-- Laboratory/test environment.
+- Simulation and validation environment.
 - Fixture-driven simulation.
 - Validation and rollback planning.
 

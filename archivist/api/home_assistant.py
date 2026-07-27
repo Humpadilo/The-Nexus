@@ -31,6 +31,37 @@ class HomeAssistantClient:
         except (aiohttp.ClientError, asyncio.TimeoutError) as exc:
             raise HomeAssistantApiError(str(exc)) from exc
 
+    async def get_configuration(self, domain: str, object_id: str) -> dict[str, Any]:
+        """Read one UI-managed automation/script/scene configuration."""
+        if domain not in {"automation", "script", "scene"}:
+            raise HomeAssistantApiError(f"unsupported configuration domain: {domain}")
+        try:
+            async with aiohttp.ClientSession(timeout=self.timeout, headers=self.headers) as session:
+                async with session.get(f"{self.rest_url}/config/{domain}/config/{object_id}") as response:
+                    if response.status != 200:
+                        raise HomeAssistantApiError(
+                            f"{domain} configuration request returned HTTP {response.status}"
+                        )
+                    payload = await response.json()
+                    return payload if isinstance(payload, dict) else {"value": payload}
+        except (aiohttp.ClientError, asyncio.TimeoutError) as exc:
+            raise HomeAssistantApiError(str(exc)) from exc
+
+    async def get_configurations(self, states: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+        """Best-effort read of loaded UI-managed configurations for diagnosis."""
+        configurations: dict[str, dict[str, Any]] = {}
+        for state in states:
+            entity_id = str(state.get("entity_id", ""))
+            domain, separator, object_id = entity_id.partition(".")
+            config_id = (state.get("attributes") or {}).get("id")
+            if not separator or domain not in {"automation", "script", "scene"} or not config_id:
+                continue
+            try:
+                configurations[entity_id] = await self.get_configuration(domain, str(config_id))
+            except HomeAssistantApiError:
+                continue
+        return configurations
+
     async def websocket_command(self, command: str, **payload: Any) -> list[dict[str, Any]]:
         if not self.token:
             raise HomeAssistantApiError("SUPERVISOR_TOKEN is not configured")

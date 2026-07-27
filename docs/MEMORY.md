@@ -12,13 +12,15 @@ Watcher begins from this persisted snapshot model. It remains read-only and loca
 
 ## Current project identity
 
-The Nexus is the long-term system direction. The Archivist is the implemented Version 0.1 subsystem. The name separation prevents future modules from being confused with the current collector.
+The Nexus is the local-first Home Operating System identity. Home Assistant remains the execution platform and source of runtime truth. The implemented modules are Archivist, Watcher, the Semantic Layer, Dashboard / Nexus Experience, and Curator; planned boundaries are Raven, Planner, Engineer, Oracle, and Tracy.
 
 Version 0.3 adds the implemented Semantic Knowledge Foundation. It is a rebuildable projection of stored Home Assistant state and registry data, not an independent source of truth. Its dashboard-oriented facts provide stable labels, relationships, grouping, health, provenance, and confidence for the future Curator UI.
 
 Version 0.4 adds The Nexus Dashboard as a read-only consumer of semantic facts and Watcher findings. Live Version 0.3 verification produced snapshot 4 with 437 entities, 20 unavailable, 120 unknown, 1,379 semantic facts, 60 devices, and 8 areas. Version 0.4.0 was then verified on Home Assistant OS: Ingress loaded, the dashboard rendered live semantic data, a manual snapshot collected 436 entities, 59 devices, and 8 areas, and its audit bundle parsed with 1,375 facts and provenance. Version 0.4.5 added the presentation-only Nexus Experience; live verification confirmed Version 0.4.5 running in Home Assistant, module-oriented Ingress navigation, a snapshot of 437 entities, 60 devices, and 8 areas, and an audit bundle with 1,379 facts and provenance. The verified release is tagged `v0.4.5-verified`.
 
 Version 0.5 adds Curator as the read-only human organization layer. Live verification confirmed Version 0.5.0 installed and running on Home Assistant OS, Ingress loaded, a snapshot of 437 entities, and a Curator export containing 9 areas, 9 human concepts, 48 explicit relationships, 94 organization cues, and provenance. The local suite passed 15 tests. The verified release is tagged `v0.5.0-verified`.
+
+Version 0.6 adds Raven as the read-only diagnostic layer. It may read UI-managed automation, script, and scene configurations through Home Assistant's REST API for evidence-backed investigation; it does not read protected files or modify Home Assistant.
 
 ## Local-first assumption
 
@@ -44,7 +46,9 @@ The project intentionally avoids `secrets.yaml`, authentication files, integrati
 
 - The Nexus: the long-term project and documentation umbrella.
 - The Archivist: the current collector and snapshot subsystem.
-- Watcher, Curator, Oracle, Steward, Laboratory: future subsystem names and boundaries.
+- Implemented modules: Archivist, Watcher, Semantic Layer, Dashboard / Nexus Experience, Curator, and Raven.
+- Planned modules: Planner, Engineer, Oracle, and Tracy.
+- Concierge is a future Interface Layer role, not a core intelligence module.
 - Version numbers describe project maturity, not the presence of every named subsystem.
 
 ## SmartThings assumptions
@@ -53,7 +57,7 @@ No SmartThings integration or implementation is present in this repository. Any 
 
 ## House Modes and dashboards
 
-No house-mode model or dashboard system is implemented here. Future work must define the data source, ownership, user interaction, privacy implications, and failure behavior before treating either as an architecture commitment.
+The Dashboard / Nexus Experience is implemented as a read-only presentation layer. No house-mode model is implemented here. Future work must define the data source, ownership, user interaction, privacy implications, and failure behavior before treating house modes as an architecture commitment.
 
 ## Known limitations
 

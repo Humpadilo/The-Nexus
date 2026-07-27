@@ -83,8 +83,17 @@ class Database:
                 );
                 CREATE INDEX IF NOT EXISTS idx_semantic_fact_type ON semantic_facts(snapshot_id, fact_type);
                 CREATE INDEX IF NOT EXISTS idx_semantic_subject ON semantic_facts(subject_id);
+                CREATE TABLE IF NOT EXISTS raven_diagnoses (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    created_at TEXT NOT NULL,
+                    snapshot_id INTEGER NOT NULL REFERENCES snapshots(id),
+                    target TEXT,
+                    status TEXT NOT NULL,
+                    diagnosis_json TEXT NOT NULL
+                );
+                CREATE INDEX IF NOT EXISTS idx_raven_created_at ON raven_diagnoses(created_at);
             """)
-            conn.execute("PRAGMA user_version = 3")
+            conn.execute("PRAGMA user_version = 4")
 
     def save_snapshot(self, summary: dict[str, int], observations: list[EntityObservation], registries: dict[str, Any]) -> int:
         captured_at = datetime.now(UTC).isoformat()
@@ -157,6 +166,20 @@ class Database:
     def get_semantic_projection(self, snapshot_id: int) -> dict[str, Any] | None:
         with self._connect() as conn:
             return self._semantic_projection(conn, snapshot_id)
+
+    def save_raven_diagnosis(self, diagnosis: dict[str, Any]) -> int:
+        """Persist one immutable Raven diagnosis and its evidence."""
+        with self._connect() as conn:
+            cursor = conn.execute(
+                "INSERT INTO raven_diagnoses (created_at, snapshot_id, target, status, diagnosis_json) VALUES (?, ?, ?, ?, ?)",
+                (datetime.now(UTC).isoformat(), diagnosis["snapshot_id"], diagnosis.get("target"), diagnosis["status"], json.dumps(diagnosis)),
+            )
+        return int(cursor.lastrowid)
+
+    def list_raven_diagnoses(self, limit: int = 20) -> list[dict[str, Any]]:
+        with self._connect() as conn:
+            rows = conn.execute("SELECT id, created_at, snapshot_id, target, status, diagnosis_json FROM raven_diagnoses ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
+        return [{"id": row["id"], "created_at": row["created_at"], "snapshot_id": row["snapshot_id"], "target": row["target"], "status": row["status"], "diagnosis": json.loads(row["diagnosis_json"])} for row in rows]
 
     def latest_snapshot(self) -> Snapshot | None:
         with self._connect() as conn:

@@ -52,14 +52,26 @@ Implemented in Version 0.4 as the read-only presentation consumer of Semantic Kn
 
 Implemented in Version 0.5. Organizes semantic facts, explicit snapshot references, and Watcher findings around areas, human concepts, relationships, and read-only health context. It does not create a competing source of truth.
 
+### Raven — Investigator
+
+Implemented in Version 0.6. Investigates selected controls using snapshot evidence and read-only Home Assistant configuration reads. It traces explicit dependencies, identifies broken and unavailable references, explains likely causes, and produces repair recommendations without modifying production.
+
 ### Oracle — Reasoning
 
-Future module. Explains observations and produces evidence-backed recommendations. It must not apply changes.
+Future module. Predicts future states and identifies emerging issues. It must expose uncertainty and evidence.
 
-### Steward — Implementation
+### Planner — Planning
 
-Future module. Applies explicitly approved, reversible changes and records the result.
+Future module. Creates recommended plans and workflows. Plans remain proposals until explicitly approved.
 
-### Laboratory — Validation
+### Engineer — Implementation planning
 
-Future module. Simulates or validates proposed changes away from production.
+Future module. Produces implementation plans and repair proposals. It must never silently modify production.
+
+### Tracy — Intelligence and orchestration
+
+Future module. Coordinates Nexus modules, understands intent, personalizes context, and translates technical information into natural language. Tracy does not directly execute production changes.
+
+### Interface Layer
+
+Future presentation role for dashboard, touchscreen, voice, mobile, and other interfaces. Concierge belongs here as a presentation role rather than a core intelligence module.

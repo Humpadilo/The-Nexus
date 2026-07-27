@@ -160,9 +160,19 @@ Sprint 3 is complete and verified. Sprint 4 implements The Nexus Dashboard as th
 - Release verification tag: `v0.5.0-verified`.
 - Relationship discovery remains conservative and only reports explicit references available in collected state attributes.
 
-### Next sprint
+## Sprint 6 — Raven Diagnostics — in progress
 
-- Sprint 6: Product review and next approved module planning.
+- [x] Add a read-only Raven investigation service and evidence model.
+- [x] Read available UI-managed automation, script, and scene configuration through Home Assistant REST APIs.
+- [x] Trace explicit dependencies and identify broken, unavailable, orphaned, and unassigned conditions.
+- [x] Persist diagnoses and provide machine-readable exports.
+- [x] Add Raven Ingress investigation controls and local tests.
+- [ ] Investigate a real Home Assistant issue and verify the root cause live.
+
+### Sprint 6 verification
+
+- Local suite: 18 tests passed.
+- Live Home Assistant smoke test remains in progress.
 
 ## Completed sprint history
 

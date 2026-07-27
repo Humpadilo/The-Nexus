@@ -49,3 +49,15 @@ def test_semantic_projection_round_trip_and_rebuild(tmp_path: Path) -> None:
 
     db.save_semantic_projection(projection)
     assert len(db.get_semantic_projection(snapshot_id)["facts"]) == len(projection.facts)
+
+
+def test_raven_diagnosis_persists_evidence(tmp_path: Path) -> None:
+    db = Database(tmp_path / "archivist.db")
+    snapshot_id = db.save_snapshot({"total_entities": 0, "unavailable_entities": 0, "unknown_entities": 0, "disabled_or_unavailable_automations": 0, "low_battery_entities": 0}, [], {})
+    diagnosis = {"snapshot_id": snapshot_id, "target": "input_select.house_mode", "status": "diagnosed", "evidence": {"read_only": True}}
+
+    diagnosis_id = db.save_raven_diagnosis(diagnosis)
+
+    stored = db.list_raven_diagnoses()
+    assert diagnosis_id == stored[0]["id"]
+    assert stored[0]["diagnosis"]["evidence"]["read_only"] is True
