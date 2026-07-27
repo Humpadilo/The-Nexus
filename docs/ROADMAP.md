@@ -126,6 +126,8 @@ Users can understand what belongs to an area and which known objects depend on o
 
 ## v0.6 — Raven Diagnostics
 
+Status: complete and verified as `v0.6.0-verified`.
+
 ### Goals
 
 Investigate real Home Assistant failures using evidence-backed dependency and execution-path analysis.

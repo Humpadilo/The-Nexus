@@ -12,7 +12,7 @@ Watcher begins from this persisted snapshot model. It remains read-only and loca
 
 ## Current project identity
 
-The Nexus is the local-first Home Operating System identity. Home Assistant remains the execution platform and source of runtime truth. The implemented modules are Archivist, Watcher, the Semantic Layer, Dashboard / Nexus Experience, and Curator; planned boundaries are Raven, Planner, Engineer, Oracle, and Tracy.
+The Nexus is the local-first Home Operating System identity. Home Assistant remains the execution platform and source of runtime truth. The implemented modules are Archivist, Watcher, the Semantic Layer, Dashboard / Nexus Experience, Curator, and Raven; planned boundaries are Planner, Engineer, Oracle, and Tracy.
 
 Version 0.3 adds the implemented Semantic Knowledge Foundation. It is a rebuildable projection of stored Home Assistant state and registry data, not an independent source of truth. Its dashboard-oriented facts provide stable labels, relationships, grouping, health, provenance, and confidence for the future Curator UI.
 
@@ -20,7 +20,7 @@ Version 0.4 adds The Nexus Dashboard as a read-only consumer of semantic facts a
 
 Version 0.5 adds Curator as the read-only human organization layer. Live verification confirmed Version 0.5.0 installed and running on Home Assistant OS, Ingress loaded, a snapshot of 437 entities, and a Curator export containing 9 areas, 9 human concepts, 48 explicit relationships, 94 organization cues, and provenance. The local suite passed 15 tests. The verified release is tagged `v0.5.0-verified`.
 
-Version 0.6 adds Raven as the read-only diagnostic layer. It may read UI-managed automation, script, and scene configurations through Home Assistant's REST API for evidence-backed investigation; it does not read protected files or modify Home Assistant.
+Version 0.6 adds Raven as the read-only diagnostic layer. It may read UI-managed automation, script, and scene configurations through Home Assistant's REST API for evidence-backed investigation; it does not read protected files or modify Home Assistant. Live verification installed Version 0.6.0 on Home Assistant OS, loaded Ingress, collected 437 entities (20 unavailable and 119 unknown), persisted 142 active findings, and diagnosed the real `input_select.house_mode` control through 13 configuration sources with a high-confidence broken reference. The local suite passed 18 tests, the diagnosis export was downloaded, and the verified release is tagged `v0.6.0-verified`.
 
 ## Local-first assumption
 

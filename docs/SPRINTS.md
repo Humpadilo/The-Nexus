@@ -160,19 +160,23 @@ Sprint 3 is complete and verified. Sprint 4 implements The Nexus Dashboard as th
 - Release verification tag: `v0.5.0-verified`.
 - Relationship discovery remains conservative and only reports explicit references available in collected state attributes.
 
-## Sprint 6 — Raven Diagnostics — in progress
+## Sprint 6 — Raven Diagnostics — complete
 
 - [x] Add a read-only Raven investigation service and evidence model.
 - [x] Read available UI-managed automation, script, and scene configuration through Home Assistant REST APIs.
 - [x] Trace explicit dependencies and identify broken, unavailable, orphaned, and unassigned conditions.
 - [x] Persist diagnoses and provide machine-readable exports.
 - [x] Add Raven Ingress investigation controls and local tests.
-- [ ] Investigate a real Home Assistant issue and verify the root cause live.
+- [x] Investigate a real Home Assistant issue and verify the root cause live.
 
 ### Sprint 6 verification
 
 - Local suite: 18 tests passed.
-- Live Home Assistant smoke test remains in progress.
+- Version 0.6.0 installed and running on Home Assistant OS; Ingress loaded successfully.
+- A live snapshot collected 437 entities, including 20 unavailable and 119 unknown, and persisted SQLite snapshot 2 with 142 active Watcher findings.
+- Raven investigated the real `input_select.house_mode` control, traced 13 configuration sources, and identified a high-confidence broken reference with read-only evidence and a repair recommendation.
+- Raven diagnoses persisted in SQLite and the JSON diagnosis export was downloaded from Ingress.
+- Release verification tag: `v0.6.0-verified`.
 
 ## Completed sprint history
 

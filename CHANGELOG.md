@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.0 - 2026-07-27
+
+- Added Raven, a read-only diagnostic investigator for selected Home Assistant entities, helpers, automations, scripts, scenes, and concepts.
+- Added explicit dependency tracing, broken-reference and unavailable-dependency findings, rename hints, orphaned-helper and missing-area checks, SQLite diagnosis persistence, and JSON export.
+- Verified on Home Assistant OS: Version 0.6.0 installed and running, Ingress loaded, 437 entities collected (20 unavailable, 119 unknown), and 142 active Watcher findings persisted.
+- Raven diagnosed the real `input_select.house_mode` control across 13 configuration sources with a high-confidence broken reference and a read-only repair recommendation.
+- Local suite: 18 tests passed; release verification tag: `v0.6.0-verified`.
+
 ## 0.5.0 - 2026-07-26
 
 - Added Curator, a deterministic read-only organization projection over semantic facts, raw snapshot attributes, and Watcher findings.

@@ -4,7 +4,7 @@ The Nexus is the long-term project name for a local-first Home Operating System.
 
 ## Current status
 
-Version `0.6.0` is the current development release. Implemented modules include Archivist, Watcher, the Semantic Layer, Dashboard / Nexus Experience, Curator, and Raven. The Home Assistant app provides Ingress, a FastAPI web interface, read-only collection, configuration-backed diagnosis, SQLite persistence, semantic projections, Watcher findings, Curator organization, JSON exports, structured logging, and tests.
+Version `0.6.0` is the current verified release. Implemented modules include Archivist, Watcher, the Semantic Layer, Dashboard / Nexus Experience, Curator, and Raven. The Home Assistant app provides Ingress, a FastAPI web interface, read-only collection, configuration-backed diagnosis, SQLite persistence, semantic projections, Watcher findings, Curator organization, JSON exports, structured logging, and tests.
 
 The following are not implemented in this repository: Planner, Engineer, Oracle, Tracy, AI analysis, automatic repair, YAML generation, approval workflows, SmartThings integration, house modes, occupancy intelligence, voice control, and production changes.
 

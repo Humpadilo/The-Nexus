@@ -21,6 +21,14 @@ This documentation changelog follows [Keep a Changelog](https://keepachangelog.c
 
 - Raven produces evidence-backed diagnoses and repair recommendations only. It does not perform repairs or call Home Assistant services.
 
+### Verification
+
+- Version 0.6.0 installed and ran on Home Assistant OS with Ingress loaded.
+- A live snapshot collected 437 entities, including 20 unavailable and 119 unknown, and persisted 142 active Watcher findings.
+- Raven investigated the real `input_select.house_mode` control across 13 configuration sources and identified a high-confidence broken reference using snapshot and read-only configuration evidence.
+- Raven diagnoses persisted in SQLite and the JSON diagnosis export was downloaded from Ingress.
+- Local suite: 18 tests passed; release verification tag: `v0.6.0-verified`.
+
 ## [0.5.0] - 2026-07-26
 
 ### Added
