@@ -11,13 +11,14 @@ from typing import Iterator
 
 import uvicorn
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from archivist.api.home_assistant import HomeAssistantClient
 from archivist.collector.service import Collector
 from archivist.config import Settings
+from archivist.curator.exporter import create_export
 from archivist.curator.service import CuratorBuilder
 from archivist.dashboard.service import DashboardBuilder
 from archivist.engineer.service import EngineerProposalBuilder
@@ -36,6 +37,7 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
     current_settings = app_settings or Settings()
     current_database = app_database or Database(current_settings.database_path)
     templates = Jinja2Templates(directory=str(TEMPLATES_DIRECTORY))
+    curator_export_lock = asyncio.Lock()
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> Iterator[None]:
@@ -152,6 +154,27 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
     @application.get("/curator/{snapshot_id}.json")
     async def curator_download(snapshot_id: int) -> Response:
         return curator_bundle(snapshot_id)
+
+    @application.post("/curator/export")
+    async def run_curator_export() -> JSONResponse:
+        """Generate the full Curator ZIP from an app, dashboard, or service trigger."""
+        if curator_export_lock.locked():
+            return JSONResponse({"error": "A Curator export is already running."}, status_code=409)
+        try:
+            async with curator_export_lock:
+                archive = await create_export(settings=current_settings)
+            return JSONResponse({"status": "success", "filename": archive.name,
+                                 "download_url": "curator/export/latest.zip"})
+        except Exception:
+            logger.exception("curator_export_failed")
+            return JSONResponse({"error": "Curator export failed. Check the app logs."}, status_code=502)
+
+    @application.get("/curator/export/latest.zip")
+    async def download_curator_export() -> Response:
+        exports = sorted(current_settings.curator_export_dir.glob("Curator_Report_*.zip"), reverse=True)
+        if not exports:
+            return JSONResponse({"error": "No Curator export has been generated yet."}, status_code=404)
+        return FileResponse(exports[0], filename=exports[0].name, media_type="application/zip")
 
     @application.get("/watcher/findings")
     async def watcher_findings() -> JSONResponse:
