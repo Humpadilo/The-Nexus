@@ -1,5 +1,5 @@
 name: The Archivist
-version: "0.8.1"
+version: "0.8.2"
 slug: the_archivist
 description: Read-only local snapshots and audits of a Home Assistant instance.
 url: https://github.com/Humpadilo/The-Nexus

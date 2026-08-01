@@ -76,6 +76,7 @@ impact: Updating the Archivist add-on does not automatically install or register
 risk: Users may believe the official execution path is available when the service is not installed.
 evidence: `custom_components/archivist/` is separate from the add-on image and README instructions require copying it into `/config/custom_components/archivist/` and restarting Home Assistant.
 root_cause: Home Assistant custom integrations and add-ons have separate installation lifecycles.
+fix_evidence: Add-on version `0.8.2` now publishes `curator_trigger_token` in both `options` and `schema`; application settings already consume the Supervisor-provided option.
 recommended_fix: Provide a documented, repeatable installation path and a startup health check that clearly reports whether the service bridge is installed and reachable. Consider a companion integration repository or managed package later.
 verification: A clean installation can update the add-on and obtain a working `archivist.run_curator` service without undocumented manual steps.
 
