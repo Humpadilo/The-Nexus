@@ -5,12 +5,13 @@ from __future__ import annotations
 import json
 import asyncio
 import logging
+import secrets
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Iterator
 
 import uvicorn
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Header, Request
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -74,6 +75,13 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
             current_database,
         )
 
+    def curator_authorized(authorization: str | None) -> bool:
+        token = current_settings.curator_trigger_token
+        if not token or not authorization or not authorization.startswith("Bearer "):
+            return False
+        supplied = authorization.removeprefix("Bearer ").strip()
+        return bool(supplied) and secrets.compare_digest(supplied, token)
+
     @application.get("/health")
     async def health() -> dict[str, str]:
         return {"status": "ok", "service": "the-archivist"}
@@ -95,7 +103,7 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
         ]
         return templates.TemplateResponse(
             request=request, name="index.html",
-            context={"latest": latest, "findings": findings, "dashboard": dashboard, "curator": curator, "raven_diagnoses": raven_diagnoses, "engineer_proposals": engineer_proposals},
+            context={"latest": latest, "findings": findings, "dashboard": dashboard, "curator": curator, "raven_diagnoses": raven_diagnoses, "engineer_proposals": engineer_proposals, "curator_trigger_token": current_settings.curator_trigger_token or ""},
         )
 
     @application.post("/snapshot")
@@ -156,8 +164,12 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
         return curator_bundle(snapshot_id)
 
     @application.post("/curator/export")
-    async def run_curator_export() -> JSONResponse:
+    async def run_curator_export(authorization: str | None = Header(default=None)) -> JSONResponse:
         """Generate the full Curator ZIP from an app, dashboard, or service trigger."""
+        if not current_settings.curator_trigger_token:
+            return JSONResponse({"error": "Curator trigger token is not configured."}, status_code=503)
+        if not curator_authorized(authorization):
+            return JSONResponse({"error": "Curator trigger authorization failed."}, status_code=401)
         if curator_export_lock.locked():
             return JSONResponse({"error": "A Curator export is already running."}, status_code=409)
         try:
@@ -170,7 +182,11 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
             return JSONResponse({"error": "Curator export failed. Check the app logs."}, status_code=502)
 
     @application.get("/curator/export/latest.zip")
-    async def download_curator_export() -> Response:
+    async def download_curator_export(authorization: str | None = Header(default=None)) -> Response:
+        if not current_settings.curator_trigger_token:
+            return JSONResponse({"error": "Curator trigger token is not configured."}, status_code=503)
+        if not curator_authorized(authorization):
+            return JSONResponse({"error": "Curator trigger authorization failed."}, status_code=401)
         exports = sorted(current_settings.curator_export_dir.glob("Curator_Report_*.zip"), reverse=True)
         if not exports:
             return JSONResponse({"error": "No Curator export has been generated yet."}, status_code=404)

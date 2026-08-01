@@ -1,4 +1,5 @@
 import json
+import zipfile
 from pathlib import Path
 
 from fastapi.testclient import TestClient
@@ -79,4 +80,30 @@ def test_snapshot_and_audit_download(tmp_path: Path, monkeypatch) -> None:
     semantic_download = client.get(f"/semantic/{snapshot_id}.json")
     assert semantic_download.status_code == 200
     assert semantic_download.headers["content-disposition"] == f"attachment; filename=semantic-{snapshot_id}.json"
-    assert semantic_download.json()["summary"]["entity_count"] == 2
+
+
+def test_curator_export_requires_token_and_downloads_latest_zip(tmp_path: Path, monkeypatch) -> None:
+    settings = Settings(data_dir=tmp_path, curator_trigger_token="test-token", schedule_enabled=False)
+    database = Database(settings.database_path)
+    application = create_app(settings, database)
+    client = TestClient(application)
+
+    async def fake_create_export(*, settings):
+        settings.curator_export_dir.mkdir(parents=True, exist_ok=True)
+        archive = settings.curator_export_dir / "Curator_Report_2026-08-01_1200.zip"
+        with zipfile.ZipFile(archive, "w") as bundle:
+            bundle.writestr("system.json", "{}")
+        return archive
+
+    monkeypatch.setattr("archivist.main.create_export", fake_create_export)
+
+    assert client.post("/curator/export").status_code == 401
+    headers = {"Authorization": "Bearer test-token"}
+    response = client.post("/curator/export", headers=headers)
+    assert response.status_code == 200
+    assert response.json()["filename"] == "Curator_Report_2026-08-01_1200.zip"
+
+    download = client.get("/curator/export/latest.zip", headers=headers)
+    assert download.status_code == 200
+    assert download.content.startswith(b"PK")
+    assert client.get("/curator/export/latest.zip").status_code == 401

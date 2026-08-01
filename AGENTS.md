@@ -176,6 +176,18 @@ Do not expand functionality, redesign architecture, or add speculative capabilit
 
 Treat Curator reports as the primary evidence source for prioritization, diagnosis, and future changes. Preserve the read-only collection path and avoid changing Home Assistant while gathering evidence.
 
+## Curator Architecture Freeze
+
+The Curator architecture is frozen. Only fix findings that already exist in `docs/ACTIVE_FINDINGS.md` or its resolved history. Do not add new export categories, redesign execution, introduce new report schemas, or change Curator responsibilities during the freeze.
+
+When fixing an existing finding:
+
+1. Make the change autonomously only when it does not require human confirmation, Home Assistant configuration, secret entry, deployment approval, or an external production action.
+2. Preserve system synergy: maintain read-only behavior, existing interfaces, backward compatibility, graceful degradation, evidence provenance, and compatibility with Raven, Engineer, Watcher, ChatGPT, and the Home Assistant add-on.
+3. If human confirmation or production access is required, stop at the safe boundary and report the exact human task instead of simulating or assuming completion.
+4. Update the matching active finding with evidence and lifecycle status. Never delete historical findings; move verified or closed findings into `Resolved/` while preserving their IDs and history.
+5. Every change handoff must include a roll-up covering: completed changes, findings affected, critical human tasks, verification status, and how the system works after the change.
+
 ---
 
 # Engineering Philosophy
