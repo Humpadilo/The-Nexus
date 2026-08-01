@@ -31,6 +31,47 @@ class HomeAssistantClient:
         except (aiohttp.ClientError, asyncio.TimeoutError) as exc:
             raise HomeAssistantApiError(str(exc)) from exc
 
+    async def get_json(self, path: str) -> Any:
+        """Read a JSON endpoint through the Home Assistant API proxy."""
+        if not path.startswith("/"):
+            path = f"/{path}"
+        try:
+            async with aiohttp.ClientSession(timeout=self.timeout, headers=self.headers) as session:
+                async with session.get(f"{self.rest_url}{path}") as response:
+                    if response.status != 200:
+                        raise HomeAssistantApiError(f"{path} request returned HTTP {response.status}")
+                    return await response.json()
+        except (aiohttp.ClientError, asyncio.TimeoutError) as exc:
+            raise HomeAssistantApiError(str(exc)) from exc
+
+    async def get_text(self, path: str) -> str:
+        """Read a text endpoint through the Home Assistant API proxy."""
+        if not path.startswith("/"):
+            path = f"/{path}"
+        try:
+            async with aiohttp.ClientSession(timeout=self.timeout, headers=self.headers) as session:
+                async with session.get(f"{self.rest_url}{path}") as response:
+                    if response.status != 200:
+                        raise HomeAssistantApiError(f"{path} request returned HTTP {response.status}")
+                    return await response.text()
+        except (aiohttp.ClientError, asyncio.TimeoutError) as exc:
+            raise HomeAssistantApiError(str(exc)) from exc
+
+    async def get_supervisor_json(self, path: str) -> Any:
+        """Read a Supervisor API endpoint; this is only used for GET requests."""
+        if not self.token:
+            raise HomeAssistantApiError("SUPERVISOR_TOKEN is not configured")
+        if not path.startswith("/"):
+            path = f"/{path}"
+        try:
+            async with aiohttp.ClientSession(timeout=self.timeout, headers=self.headers) as session:
+                async with session.get(f"http://supervisor{path}") as response:
+                    if response.status != 200:
+                        raise HomeAssistantApiError(f"Supervisor {path} request returned HTTP {response.status}")
+                    return await response.json()
+        except (aiohttp.ClientError, asyncio.TimeoutError) as exc:
+            raise HomeAssistantApiError(str(exc)) from exc
+
     async def get_configuration(self, domain: str, object_id: str) -> dict[str, Any]:
         """Read one UI-managed automation/script/scene configuration."""
         if domain not in {"automation", "script", "scene"}:
@@ -88,7 +129,7 @@ class HomeAssistantClient:
         except (aiohttp.ClientError, asyncio.TimeoutError) as exc:
             raise HomeAssistantApiError(str(exc)) from exc
 
-    async def websocket_command(self, command: str, **payload: Any) -> list[dict[str, Any]]:
+    async def websocket_command(self, command: str, **payload: Any) -> Any:
         if not self.token:
             raise HomeAssistantApiError("SUPERVISOR_TOKEN is not configured")
         async with aiohttp.ClientSession(timeout=self.timeout) as session:
@@ -111,7 +152,13 @@ class HomeAssistantClient:
 
     async def get_registries(self) -> dict[str, list[dict[str, Any]]]:
         registries: dict[str, list[dict[str, Any]]] = {}
-        commands = {"entities": "config/entity_registry/list", "devices": "config/device_registry/list", "areas": "config/area_registry/list"}
+        commands = {
+            "entities": "config/entity_registry/list",
+            "devices": "config/device_registry/list",
+            "areas": "config/area_registry/list",
+            "floors": "config/floor_registry/list",
+            "labels": "config/label_registry/list",
+        }
         for name, command in commands.items():
             try:
                 registries[name] = await self.websocket_command(command)

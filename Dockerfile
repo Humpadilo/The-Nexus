@@ -1,7 +1,7 @@
 ARG BUILD_FROM=python:3.12-slim-bookworm
 FROM ${BUILD_FROM}
 
-ARG BUILD_VERSION=0.7.0
+ARG BUILD_VERSION=0.8.0
 ARG BUILD_ARCH=amd64
 LABEL \
   io.hass.version="${BUILD_VERSION}" \
@@ -14,7 +14,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY archivist ./archivist
 COPY rootfs /
-RUN chmod +x /usr/local/bin/archivist
+RUN chmod +x /usr/local/bin/archivist /usr/local/bin/curator-export
 
 EXPOSE 8099
 CMD ["/usr/local/bin/archivist"]
