@@ -48,3 +48,49 @@ python -m archivist.main
 ```
 
 Structured logs are emitted as JSON to stdout. SQLite, generated bundles, and future app configuration belong in `/data` in the container (override with `ARCHIVIST_DATA_DIR` for local development).
+
+### Curator intelligence export
+
+Inside the Home Assistant add-on, run `python -m archivist.curator.exporter`; it automatically uses the Supervisor-injected `SUPERVISOR_TOKEN`, the internal Core API proxy, and persistent `/data/Inventory/Exports/` storage. For standalone development, the same command uses `./Inventory/Exports/` (or `--output-dir`) and records missing tokens, unreachable APIs, and unavailable sections in `system.json` and `errors.json`. No service calls or recorder-history bulk export are performed.
+
+### Deploy and verify Curator in Home Assistant
+
+The Curator must be executed inside the Archivist app container for a production report. The add-on manifest requests both the Home Assistant Core API proxy and the Supervisor API, and version `0.8.0` is the deployment marker for this exporter.
+
+1. Build the updated add-on. If using a local Home Assistant add-on repository, copy or pull this repository into the local repository directory, then build it from the Home Assistant host:
+
+   ```bash
+   ha addons rebuild the_archivist
+   ```
+
+   If the Home Assistant installation does not provide `rebuild`, reload the local add-on repository, open **Settings → Apps → The Archivist**, and use **Rebuild** from the add-on menu. For a standalone Docker build, run `docker build -t the-archivist:0.8.0 .`; that image is not a production Home Assistant verification.
+
+2. Install or update the add-on from **Settings → Apps → The Archivist**. Confirm that the installed version is `0.8.0`, start the add-on, and wait until its health/status is running. The add-on must retain `homeassistant_api: true` and `hassio_api: true` in its manifest.
+
+3. Run the Curator inside the add-on. From the Home Assistant host terminal or an SSH session, identify the container with `docker ps --format '{{.Names}}' | grep archivist`, then run:
+
+   ```bash
+   docker exec <archivist-container-name> /usr/local/bin/curator-export
+   ```
+
+   The command is also available as `python -m archivist.curator.exporter`. It writes to `/data/Inventory/Exports/` inside the add-on and performs read-only Core and Supervisor API reads.
+
+4. Retrieve the ZIP from the add-on's mapped data directory. From the Home Assistant host, use:
+
+   ```bash
+   docker cp <archivist-container-name>:/data/Inventory/Exports/Curator_Report_YYYY-MM-DD_HHMM.zip .
+   ```
+
+   Alternatively, copy the file from the Home Assistant `/data` mapping used by the add-on. Do not use a report generated from the repository workstation as a production report.
+
+5. Verify the report is executing inside Home Assistant. Inspect `system.json` and confirm:
+
+   ```json
+   {
+     "environment": "home_assistant_addon",
+     "supervisor_token_available": true,
+     "degraded": false
+   }
+   ```
+
+   Also confirm that `entity_count`, `device_count`, and `area_count` are populated, `errors.json` has no base API/token errors, and `supervisor.json`, `config.json`, `entities.json`, and `devices.json` contain real installation data. If the report says `standalone`, the command was run outside the add-on container.

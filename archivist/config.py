@@ -19,6 +19,11 @@ def _options() -> dict[str, Any]:
 _APP_OPTIONS = _options()
 
 
+def _running_in_home_assistant_addon() -> bool:
+    """Detect the Supervisor-injected add-on runtime without requiring a token value."""
+    return bool(os.getenv("SUPERVISOR_TOKEN") or os.getenv("SUPERVISOR_CORE_API") or Path("/data/options.json").exists())
+
+
 def _option_bool(name: str, default: bool) -> bool:
     value = os.getenv(f"ARCHIVIST_{name.upper()}")
     if value is None:
@@ -41,7 +46,8 @@ class Settings:
     port: int = int(os.getenv("ARCHIVIST_PORT", "8099"))
     ha_rest_url: str = os.getenv("SUPERVISOR_CORE_API", "http://supervisor/core/api")
     ha_ws_url: str = os.getenv("SUPERVISOR_CORE_WS", "ws://supervisor/core/websocket")
-    supervisor_token: str | None = os.getenv("SUPERVISOR_TOKEN")
+    supervisor_token: str | None = os.getenv("SUPERVISOR_TOKEN") or None
+    runtime_environment: str = "home_assistant_addon" if _running_in_home_assistant_addon() else "standalone"
     schedule_enabled: bool = _option_bool("schedule_enabled", True)
     schedule_interval_hours: int = max(1, _option_int("schedule_interval_hours", 24))
     finding_retention_days: int = max(30, _option_int("finding_retention_days", 365))
@@ -53,3 +59,13 @@ class Settings:
     @property
     def bundles_dir(self) -> Path:
         return self.data_dir / "bundles"
+
+    @property
+    def curator_export_dir(self) -> Path:
+        """Use persistent add-on storage, while retaining a convenient local default."""
+        configured = os.getenv("ARCHIVIST_EXPORT_DIR")
+        if configured:
+            return Path(configured)
+        if self.runtime_environment == "home_assistant_addon":
+            return self.data_dir / "Inventory" / "Exports"
+        return Path.cwd() / "Inventory" / "Exports"
