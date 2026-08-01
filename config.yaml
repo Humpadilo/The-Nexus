@@ -21,10 +21,12 @@ options:
   schedule_enabled: true
   schedule_interval_hours: 24
   finding_retention_days: 365
+  curator_trigger_token: ""
 schema:
   schedule_enabled: bool
   schedule_interval_hours: int(1,168)
   finding_retention_days: int(30,3650)
+  curator_trigger_token: str
 ports:
   8099/tcp: null
 ports_description:

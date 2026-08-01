@@ -99,11 +99,14 @@ The Curator must be executed inside the Archivist app container for a production
 
 The exporter remains unchanged and the shell command is retained for debugging, but normal use no longer requires shell access. The Archivist ingress page now provides **Generate intelligence ZIP**, which calls `POST /curator/export` and downloads the newest package.
 
+The Curator trigger is bearer-token protected. Set a long random `curator_trigger_token` in the add-on configuration, then use the same value in the Home Assistant bridge configuration below. The dashboard receives the configured token server-side and uses it for the button and ZIP download.
+
 For the Home Assistant service `archivist.run_curator`, copy `custom_components/archivist/` into `/config/custom_components/archivist/`, then add this to `configuration.yaml`:
 
 ```yaml
 archivist:
   endpoint_url: http://the_archivist:8099
+  trigger_token: REPLACE_WITH_THE_SAME_RANDOM_TOKEN
 ```
 
 Restart Home Assistant, then call:
@@ -112,4 +115,4 @@ Restart Home Assistant, then call:
 service: archivist.run_curator
 ```
 
-If `the_archivist` is not resolvable from Core, set `endpoint_url` to the Archivist app hostname shown on the app information page, retaining port `8099`. The bridge performs only an HTTP POST to the add-on's read-only trigger.
+If `the_archivist` is not resolvable from Core, set `endpoint_url` to the Archivist app hostname shown on the app information page, retaining port `8099`. The bridge performs only an authenticated HTTP POST to the add-on's read-only trigger. The ZIP download also requires the bearer token.

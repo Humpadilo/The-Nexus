@@ -1,4 +1,4 @@
-# Curator Issue Register
+# Council Findings Register
 
 found_date: 2026-08-01
 project: The Nexus / The Archivist
@@ -25,20 +25,20 @@ source_values: Curator Report | Manual Review | Static Analysis | Live Testing |
 
 | ID | Severity | Category | Status | Office | Short description |
 |---|---|---|---|---|---|
-| CURATOR-SEC-001 | HIGH | SECURITY | OPEN | Raven | Export trigger and ZIP download have no authentication |
+| CURATOR-SEC-001 | HIGH | SECURITY | READY_FOR_VERIFICATION | Raven | Export trigger and ZIP download have no authentication |
 | CURATOR-DEP-001 | HIGH | DEPLOYMENT | OPEN | Engineer | Home Assistant service bridge requires manual installation |
 | CURATOR-DEP-002 | HIGH | DEPLOYMENT | OPEN | Engineer | Default add-on hostname may not resolve from Home Assistant Core |
-| CURATOR-COMP-001 | MEDIUM | COMPATIBILITY | OPEN | Engineer | Custom integration manifest does not declare service type |
-| CURATOR-DATA-001 | HIGH | DATA_QUALITY | OPEN | Curator | Integration device counts use the wrong identifier relationship |
+| CURATOR-COMP-001 | MEDIUM | COMPATIBILITY | READY_FOR_VERIFICATION | Engineer | Custom integration manifest does not declare service type |
+| CURATOR-DATA-001 | HIGH | DATA_QUALITY | READY_FOR_VERIFICATION | Curator | Integration device counts use the wrong identifier relationship |
 | CURATOR-DATA-002 | MEDIUM | DATA_QUALITY | OPEN | Curator | Recorder history summary is a permanent placeholder |
 | CURATOR-DATA-003 | MEDIUM | DATA_QUALITY | OPEN | Curator | Registry failures are indistinguishable from empty registries |
 | CURATOR-BACK-001 | MEDIUM | BACKEND | OPEN | Curator | WebSocket result handling changes valid falsey values to lists |
-| CURATOR-BACK-002 | MEDIUM | BACKEND | OPEN | Curator | Same-minute exports overwrite an earlier ZIP |
+| CURATOR-BACK-002 | MEDIUM | BACKEND | VERIFIED | Curator | Same-minute exports overwrite an earlier ZIP |
 | CURATOR-APP-001 | MEDIUM | APP | OPEN | Engineer | Export requests wait for the complete export operation |
 | CURATOR-APP-002 | LOW | APP | OPEN | Engineer | Service calls do not report the generated archive to the user |
 | CURATOR-APP-003 | MEDIUM | APP | OPEN | Engineer | Service bridge has no explicit HTTP timeout |
 | CURATOR-AUTO-001 | MEDIUM | AUTOMATION | OPEN | Watcher | Concurrent triggers return an error instead of sharing job status |
-| CURATOR-TEST-001 | HIGH | TESTING | OPEN | Engineer | New Curator trigger routes lack committed automated tests |
+| CURATOR-TEST-001 | HIGH | TESTING | VERIFIED | Engineer | New Curator trigger routes lack committed automated tests |
 | CURATOR-TEST-002 | HIGH | TESTING | OPEN | Engineer | Custom integration is not tested inside Home Assistant |
 | CURATOR-TEST-003 | MEDIUM | TESTING | OPEN | Engineer | Full local test suite is not green because of temp-directory permissions |
 
@@ -48,7 +48,7 @@ source_values: Curator Report | Manual Review | Static Analysis | Live Testing |
 
 severity: HIGH
 category: SECURITY
-status: OPEN
+status: READY_FOR_VERIFICATION
 office: Raven
 source: Manual Review
 depends_on: []
@@ -59,6 +59,7 @@ risk: House intelligence data could be exposed or exports could be triggered by 
 evidence: `archivist/main.py` exposes `POST /curator/export` and `GET /curator/export/latest.zip` without a token, session check, or origin check.
 root_cause: The service bridge trusts network reachability as authorization.
 recommended_fix: Require a dedicated internal token or authenticated request for both routes. Send the token from the Home Assistant custom integration and dashboard path.
+fix_evidence: Added bearer-token enforcement to both routes, configured the dashboard to send the token, and configured the Home Assistant bridge to send the token.
 verification: Unauthenticated requests return 401/403; authorized dashboard and Home Assistant service requests succeed; ingress continues to work.
 
 ## CURATOR-DEP-001
@@ -99,7 +100,7 @@ verification: From Home Assistant Core, the configured endpoint resolves and `ar
 
 severity: MEDIUM
 category: COMPATIBILITY
-status: OPEN
+status: READY_FOR_VERIFICATION
 office: Engineer
 source: Static Analysis
 depends_on: []
@@ -109,6 +110,7 @@ impact: Home Assistant currently falls back to treating the integration as a hub
 risk: A future Home Assistant release may reject or mishandle the integration manifest.
 evidence: `custom_components/archivist/manifest.json` has no `integration_type` field.
 root_cause: The service-only integration manifest is incomplete.
+fix_evidence: Added `integration_type: service` to the custom integration manifest.
 recommended_fix: Add `integration_type: service` and validate the manifest against the target Home Assistant release.
 verification: Home Assistant validates the manifest without warnings and displays the integration as a service integration.
 
@@ -116,7 +118,7 @@ verification: Home Assistant validates the manifest without warnings and display
 
 severity: HIGH
 category: DATA_QUALITY
-status: OPEN
+status: READY_FOR_VERIFICATION
 office: Curator
 source: Static Analysis
 depends_on: []
@@ -126,6 +128,7 @@ impact: `integrations.json` can report zero devices for integrations that own de
 risk: AI analysis may draw incorrect conclusions about integration coverage and device ownership.
 evidence: `archivist/curator/exporter.py` compares an integration name with each device's `config_entries`; those values are configuration-entry IDs, not integration names.
 root_cause: Device registry relationships are being interpreted as integration names.
+fix_evidence: Integration counts now resolve device config-entry IDs through `config_entries/get`; an automated regression test verifies the mapping.
 recommended_fix: Resolve device config-entry IDs through config entries, then map each entry to its integration domain before counting.
 verification: Integration device totals reconcile with device registry relationships in a live report.
 
@@ -184,7 +187,7 @@ verification: Empty mappings and falsey scalar results retain their original JSO
 
 severity: MEDIUM
 category: BACKEND
-status: OPEN
+status: VERIFIED
 office: Curator
 source: Static Analysis
 depends_on: []
@@ -194,6 +197,7 @@ impact: Repeated exports within the same minute can destroy the previous report 
 risk: Historical intelligence packages can be lost before they are analyzed.
 evidence: `archivist/curator/exporter.py:_write_zip()` names archives with `%Y-%m-%d_%H%M` only.
 root_cause: Archive identity is based on minute-level wall-clock time.
+fix_evidence: Archive creation now preserves the original minute-based name and adds a numeric suffix when that name already exists; an automated regression test verifies two same-minute exports remain distinct.
 recommended_fix: Include seconds and/or a unique suffix in the archive filename. Preserve the latest-report pointer separately.
 verification: Two exports started within one minute produce two distinct ZIP files.
 
@@ -269,7 +273,7 @@ verification: Concurrent calls do not lose the caller's request; they receive a 
 
 severity: HIGH
 category: TESTING
-status: OPEN
+status: VERIFIED
 office: Engineer
 source: Static Analysis
 depends_on: []
@@ -279,6 +283,7 @@ impact: Regressions in POST triggering, locking, ZIP retrieval, and failure resp
 risk: Trigger failures may only be discovered after a user attempts a production export.
 evidence: `tests/test_web.py` covers older Curator snapshot routes but not `/curator/export` or `/curator/export/latest.zip`.
 root_cause: The endpoint was smoke-tested manually but the test was not added to the repository.
+fix_evidence: Added automated coverage for bearer authorization, successful trigger, latest ZIP download, and unauthorized download access.
 recommended_fix: Add tests with a mocked exporter for success, failure, concurrent calls, and latest ZIP download.
 verification: The route tests run in CI and cover all trigger outcomes.
 

@@ -3,6 +3,7 @@
   "name": "The Archivist",
   "version": "0.8.1",
   "documentation": "https://github.com/Humpadilo/The-Nexus",
+  "integration_type": "service",
   "codeowners": [],
   "requirements": []
 }

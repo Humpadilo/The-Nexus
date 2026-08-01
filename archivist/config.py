@@ -51,6 +51,11 @@ class Settings:
     schedule_enabled: bool = _option_bool("schedule_enabled", True)
     schedule_interval_hours: int = max(1, _option_int("schedule_interval_hours", 24))
     finding_retention_days: int = max(30, _option_int("finding_retention_days", 365))
+    curator_trigger_token: str | None = (
+        os.getenv("ARCHIVIST_CURATOR_TRIGGER_TOKEN")
+        or str(_APP_OPTIONS.get("curator_trigger_token", "")).strip()
+        or None
+    )
 
     @property
     def database_path(self) -> Path:

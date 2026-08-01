@@ -267,8 +267,16 @@ class CuratorExporter:
     async def integrations(self) -> dict[str, Any]:
         domains = Counter(_domain(str(s.get("entity_id"))) for s in self.states)
         components = sorted(self.config.get("components") or domains)
+        config_entries = _items(await self._optional_ws("config_entries", "config_entries/get"))
+        entry_domains = {str(entry.get("entry_id")): str(entry.get("domain")) for entry in config_entries if entry.get("entry_id") and entry.get("domain")}
+        device_counts = Counter(
+            entry_domains.get(str(entry_id))
+            for device in self.registries.get("devices", [])
+            for entry_id in (device.get("config_entries") or [])
+            if entry_domains.get(str(entry_id))
+        )
         return {"schema_version": 1, "items": [{"integration": name, "version": None,
-            "device_count": sum(name in (d.get("config_entries") or []) for d in self.registries.get("devices", [])),
+            "device_count": device_counts.get(name, 0),
             "entity_count": domains.get(name, 0)} for name in components]}
 
     async def weather(self) -> dict[str, Any]:
@@ -509,7 +517,12 @@ class CuratorExporter:
 
     def _write_zip(self) -> Path:
         timestamp = datetime.now().astimezone().strftime("%Y-%m-%d_%H%M")
-        archive = self.output_dir / f"Curator_Report_{timestamp}.zip"
+        base_name = f"Curator_Report_{timestamp}"
+        archive = self.output_dir / f"{base_name}.zip"
+        suffix = 1
+        while archive.exists():
+            archive = self.output_dir / f"{base_name}_{suffix:02d}.zip"
+            suffix += 1
         with tempfile.TemporaryDirectory(prefix="curator-") as staging:
             root = Path(staging)
             for filename, payload in self.data.items():
