@@ -55,7 +55,7 @@ Inside the Home Assistant add-on, run `python -m archivist.curator.exporter`; it
 
 ### Deploy and verify Curator in Home Assistant
 
-The Curator must be executed inside the Archivist app container for a production report. The add-on manifest requests both the Home Assistant Core API proxy and the Supervisor API, and version `0.8.0` is the deployment marker for this exporter.
+The Curator must be executed inside the Archivist app container for a production report. The add-on manifest requests both the Home Assistant Core API proxy and the Supervisor API, and version `0.8.1` is the deployment marker for the trigger-based exporter.
 
 1. Build the updated add-on. If using a local Home Assistant add-on repository, copy or pull this repository into the local repository directory, then build it from the Home Assistant host:
 
@@ -65,7 +65,7 @@ The Curator must be executed inside the Archivist app container for a production
 
    If the Home Assistant installation does not provide `rebuild`, reload the local add-on repository, open **Settings → Apps → The Archivist**, and use **Rebuild** from the add-on menu. For a standalone Docker build, run `docker build -t the-archivist:0.8.0 .`; that image is not a production Home Assistant verification.
 
-2. Install or update the add-on from **Settings → Apps → The Archivist**. Confirm that the installed version is `0.8.0`, start the add-on, and wait until its health/status is running. The add-on must retain `homeassistant_api: true` and `hassio_api: true` in its manifest.
+2. Install or update the add-on from **Settings → Apps → The Archivist**. Confirm that the installed version is `0.8.1`, start the add-on, and wait until its health/status is running. The add-on must retain `homeassistant_api: true` and `hassio_api: true` in its manifest.
 
 3. Run the Curator inside the add-on. From the Home Assistant host terminal or an SSH session, identify the container with `docker ps --format '{{.Names}}' | grep archivist`, then run:
 
@@ -94,3 +94,22 @@ The Curator must be executed inside the Archivist app container for a production
    ```
 
    Also confirm that `entity_count`, `device_count`, and `area_count` are populated, `errors.json` has no base API/token errors, and `supervisor.json`, `config.json`, `entities.json`, and `devices.json` contain real installation data. If the report says `standalone`, the command was run outside the add-on container.
+
+### Official trigger path
+
+The exporter remains unchanged and the shell command is retained for debugging, but normal use no longer requires shell access. The Archivist ingress page now provides **Generate intelligence ZIP**, which calls `POST /curator/export` and downloads the newest package.
+
+For the Home Assistant service `archivist.run_curator`, copy `custom_components/archivist/` into `/config/custom_components/archivist/`, then add this to `configuration.yaml`:
+
+```yaml
+archivist:
+  endpoint_url: http://the_archivist:8099
+```
+
+Restart Home Assistant, then call:
+
+```yaml
+service: archivist.run_curator
+```
+
+If `the_archivist` is not resolvable from Core, set `endpoint_url` to the Archivist app hostname shown on the app information page, retaining port `8099`. The bridge performs only an HTTP POST to the add-on's read-only trigger.

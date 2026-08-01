@@ -1,0 +1,3 @@
+run_curator:
+  name: Run Curator export
+  description: Generate a read-only Curator intelligence ZIP in the Archivist add-on.
