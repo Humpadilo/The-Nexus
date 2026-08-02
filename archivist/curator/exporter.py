@@ -24,6 +24,7 @@ EXPORT_FILES = (
     "config.json", "supervisor.json", "network.json", "services.json", "exposures.json",
     "blueprints.json", "traces.json", "recorder.json", "themes.json", "custom_components.json",
     "device_diagnostics.json", "ENTITY_RELATIONSHIPS.json", "SERVICE_CATALOG.json", "FEATURE_MATRIX.json",
+    "ROOM_CAPABILITIES.json",
     "CAPABILITIES.md", "KNOWLEDGE_GAPS.md", "AI_CONTEXT.md",
 )
 
@@ -100,6 +101,7 @@ class CuratorExporter:
             "ENTITY_RELATIONSHIPS.json": self.entity_relationships,
             "SERVICE_CATALOG.json": self.service_catalog,
             "FEATURE_MATRIX.json": self.feature_matrix,
+            "ROOM_CAPABILITIES.json": self.room_capabilities,
         }
         for filename, collector in sections.items():
             try:
@@ -468,6 +470,165 @@ class CuratorExporter:
         return {"schema_version": 1, "items": [{"domain": domain, "entity_count": value["entity_count"],
             "supported_features": sorted(value["supported_features"], key=str), "attribute_keys": sorted(value["attribute_keys"])}
             for domain, value in sorted(matrix.items())]}
+
+    async def room_capabilities(self) -> dict[str, Any]:
+        """Group observable entities and room-related automations by Home Assistant area."""
+        areas_by_id = {
+            str(area.get("id") or area.get("area_id")): area
+            for area in self.registries.get("areas", [])
+            if area.get("id") or area.get("area_id")
+        }
+        devices_by_id = {
+            str(device.get("id")): device
+            for device in self.registries.get("devices", [])
+            if device.get("id")
+        }
+        entity_registry = self._entity_registry()
+        state_by_id = self._state_map()
+        helper_domains = {
+            "input_boolean", "input_select", "input_number", "input_text",
+            "input_datetime", "input_button", "timer", "counter", "schedule",
+        }
+        room_map: dict[str, dict[str, Any]] = {}
+
+        def area_id_for(entity_id: str) -> str | None:
+            registry = entity_registry.get(entity_id, {})
+            if registry.get("area_id"):
+                return str(registry["area_id"])
+            device = devices_by_id.get(str(registry.get("device_id")), {})
+            return str(device["area_id"]) if device.get("area_id") else None
+
+        def room_for(area_id: str | None) -> dict[str, Any]:
+            key = area_id or "__unassigned__"
+            if key not in room_map:
+                area = areas_by_id.get(key, {})
+                display_name = area.get("name") or (key if key != "__unassigned__" else "Unassigned")
+                room_map[key] = {
+                    "area_id": None if key == "__unassigned__" else key,
+                    "display_name": display_name,
+                    "floor_id": area.get("floor_id"),
+                    "entity_count": 0,
+                    "device_ids": [],
+                    "devices": [],
+                    "capabilities": {
+                        "lights": [], "motion_sensors": [], "presence_sensors": [],
+                        "climate": [], "media_players": [], "scripts": [],
+                        "automations": [], "helpers": [], "other_entities": [],
+                    },
+                }
+            return room_map[key]
+
+        def add_device(room: dict[str, Any], device_id: str) -> None:
+            if device_id in room["device_ids"]:
+                return
+            device = devices_by_id.get(device_id)
+            if not device:
+                room["device_ids"].append(device_id)
+                return
+            room["device_ids"].append(device_id)
+            room["devices"].append(dict(device))
+
+        def record_for(entity_id: str) -> dict[str, Any]:
+            state = state_by_id.get(entity_id, {})
+            registry = entity_registry.get(entity_id, {})
+            attributes = state.get("attributes") or {}
+            return {
+                "entity_id": entity_id,
+                "friendly_name": attributes.get("friendly_name"),
+                "domain": _domain(entity_id),
+                "state": state.get("state"),
+                "device_id": registry.get("device_id"),
+                "attributes": attributes,
+                "disabled_by": registry.get("disabled_by"),
+                "hidden_by": registry.get("hidden_by"),
+            }
+
+        def category_for(entity_id: str, attributes: dict[str, Any]) -> str:
+            domain = _domain(entity_id)
+            device_class = str(attributes.get("device_class") or "").lower()
+            name = entity_id.lower()
+            if domain == "light":
+                return "lights"
+            if domain == "binary_sensor" and (device_class == "motion" or "motion" in name):
+                return "motion_sensors"
+            if domain in {"binary_sensor", "sensor"} and (
+                device_class in {"presence", "occupancy"}
+                or any(term in name for term in ("presence", "occupancy"))
+            ):
+                return "presence_sensors"
+            if domain == "climate":
+                return "climate"
+            if domain == "media_player":
+                return "media_players"
+            if domain == "script":
+                return "scripts"
+            if domain == "automation":
+                return "automations"
+            if domain in helper_domains:
+                return "helpers"
+            return "other_entities"
+
+        for entity_id in sorted(set(state_by_id) | set(entity_registry)):
+            room = room_for(area_id_for(entity_id))
+            room["entity_count"] += 1
+            device_id = entity_registry.get(entity_id, {}).get("device_id")
+            if device_id and device_id not in room["device_ids"]:
+                add_device(room, str(device_id))
+            record = record_for(entity_id)
+            room["capabilities"][category_for(entity_id, record["attributes"])].append(record)
+
+        # Include devices with no currently registered entities as room context.
+        for device_id, device in devices_by_id.items():
+            room = room_for(str(device["area_id"]) if device.get("area_id") else None)
+            add_device(room, device_id)
+
+        # A script/automation is associated with every area referenced by its
+        # actions, conditions, triggers, or targets. Unscoped items stay unassigned.
+        for domain in ("automation", "script"):
+            configured = self.data.get(f"{domain}s.json", {}).get("items", [])
+            for item in configured if isinstance(configured, list) else []:
+                entity_id = str(item.get("entity_id") or "")
+                if not entity_id:
+                    continue
+                referenced_areas = {
+                    area_id_for(target) or "__unassigned__"
+                    for target in self._references(item)
+                    if target in state_by_id or target in entity_registry
+                }
+                direct_area = area_id_for(entity_id)
+                if direct_area:
+                    referenced_areas.add(direct_area)
+                if not referenced_areas:
+                    referenced_areas.add("__unassigned__")
+                bucket = "automations" if domain == "automation" else "scripts"
+                record = record_for(entity_id)
+                for area_id in referenced_areas:
+                    entries = room_for(None if area_id == "__unassigned__" else area_id)["capabilities"][bucket]
+                    if not any(entry.get("entity_id") == entity_id for entry in entries):
+                        entries.append(record)
+
+        rooms = []
+        for room in room_map.values():
+            room["device_ids"].sort()
+            room["devices"].sort(key=lambda device: (str(device.get("name") or "").lower(), str(device.get("id") or "")))
+            for entries in room["capabilities"].values():
+                entries.sort(key=lambda entry: (str(entry.get("friendly_name") or "").lower(), entry["entity_id"]))
+            room["capability_counts"] = {
+                category: len(entries) for category, entries in room["capabilities"].items()
+            }
+            rooms.append(room)
+        rooms.sort(key=lambda room: (room["area_id"] is None, room["display_name"].lower()))
+        return {
+            "schema_version": 1,
+            "description": "Entities, devices, and room-related automations grouped by Home Assistant area.",
+            "rooms": rooms,
+            "category_definitions": {
+                "motion_sensors": "Motion-class or motion-named binary sensors.",
+                "presence_sensors": "Presence/occupancy-class or presence/occupancy-named sensors.",
+                "helpers": "Input helpers, timers, counters, and schedules.",
+                "other_entities": "Entities outside the requested room capability categories.",
+            },
+        }
 
     def capabilities_report(self) -> str:
         matrix = self.data.get("FEATURE_MATRIX.json", {}).get("items", [])
