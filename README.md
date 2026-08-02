@@ -55,7 +55,7 @@ Inside the Home Assistant add-on, run `python -m archivist.curator.exporter`; it
 
 ### Deploy and verify Curator in Home Assistant
 
-The Curator must be executed inside the Archivist app container for a production report. The add-on manifest requests both the Home Assistant Core API proxy and the Supervisor API, and version `0.8.2` is the deployment marker for the trigger-token configuration and trigger-based exporter.
+The Curator must be executed inside the Archivist app container for a production report. The add-on manifest requests both the Home Assistant Core API proxy and the Supervisor API, and version `0.8.3` is the deployment marker for the room-capability export and trigger-based exporter.
 
 1. Build the updated add-on. If using a local Home Assistant add-on repository, copy or pull this repository into the local repository directory, then build it from the Home Assistant host:
 
@@ -65,7 +65,7 @@ The Curator must be executed inside the Archivist app container for a production
 
    If the Home Assistant installation does not provide `rebuild`, reload the local add-on repository, open **Settings → Apps → The Archivist**, and use **Rebuild** from the add-on menu. For a standalone Docker build, run `docker build -t the-archivist:0.8.0 .`; that image is not a production Home Assistant verification.
 
-2. Install or update the add-on from **Settings → Apps → The Archivist**. Confirm that the installed version is `0.8.2`, start the add-on, and wait until its health/status is running. The add-on must retain `homeassistant_api: true` and `hassio_api: true` in its manifest.
+2. Install or update the add-on from **Settings → Apps → The Archivist**. Confirm that the installed version is `0.8.3`, start the add-on, and wait until its health/status is running. The add-on must retain `homeassistant_api: true` and `hassio_api: true` in its manifest.
 
 3. Run the Curator inside the add-on. From the Home Assistant host terminal or an SSH session, identify the container with `docker ps --format '{{.Names}}' | grep archivist`, then run:
 

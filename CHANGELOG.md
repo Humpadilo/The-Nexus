@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.8.3 - 2026-08-01
+
+- Added `ROOM_CAPABILITIES.json`, grouping area entities, devices, helpers, lights, motion and presence sensors, climate, media players, scripts, and room-related automations for AI analysis.
+- Added room relationship coverage and advanced the add-on/integration deployment marker.
+
 ## 0.7.0 - Sprint 7 implementation pending live verification
 
 - Added human-centered Raven diagnosis with multiple findings, lifecycle state, restoration guidance, and explicit validation steps.
