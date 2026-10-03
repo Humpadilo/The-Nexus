@@ -195,7 +195,7 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
         return FileResponse(exports[0], filename=exports[0].name, media_type="application/zip")
 
     @application.post("/behavior/export")
-    async def run_behavior_export(authorization: str | None = Header(default=None)) -> JSONResponse:
+    async def run_behavior_export(request: Request, authorization: str | None = Header(default=None)) -> JSONResponse:
         """Generate bounded historical behavior evidence without changing Home Assistant."""
         if not current_settings.curator_trigger_token:
             return JSONResponse({"error": "Curator trigger token is not configured."}, status_code=503)
