@@ -32,6 +32,7 @@ from archivist.watcher.scheduler import WatcherScheduler
 configure_logging()
 logger = logging.getLogger(__name__)
 TEMPLATES_DIRECTORY = Path(__file__).resolve().parent / "templates"
+HOME_ASSISTANT_INGRESS_HOST = "172.30.32.2"
 
 
 def create_app(app_settings: Settings | None = None, app_database: Database | None = None) -> FastAPI:
@@ -84,6 +85,17 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
         supplied = authorization.removeprefix("Bearer ").strip()
         return bool(supplied) and secrets.compare_digest(supplied, token)
 
+    def ingress_authorized(request: Request) -> bool:
+        """Accept only Supervisor-authenticated requests from Home Assistant Ingress."""
+        return bool(
+            request.client
+            and request.client.host == HOME_ASSISTANT_INGRESS_HOST
+            and request.headers.get("X-Remote-User-Id", "").strip()
+        )
+
+    def export_authorized(request: Request, authorization: str | None) -> bool:
+        return curator_authorized(authorization) or ingress_authorized(request)
+
     @application.get("/health")
     async def health() -> dict[str, str]:
         return {"status": "ok", "service": "the-archivist"}
@@ -105,7 +117,7 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
         ]
         return templates.TemplateResponse(
             request=request, name="index.html",
-            context={"latest": latest, "findings": findings, "dashboard": dashboard, "curator": curator, "raven_diagnoses": raven_diagnoses, "engineer_proposals": engineer_proposals, "curator_trigger_token": current_settings.curator_trigger_token or ""},
+            context={"latest": latest, "findings": findings, "dashboard": dashboard, "curator": curator, "raven_diagnoses": raven_diagnoses, "engineer_proposals": engineer_proposals},
         )
 
     @application.post("/snapshot")
@@ -166,11 +178,11 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
         return curator_bundle(snapshot_id)
 
     @application.post("/curator/export")
-    async def run_curator_export(authorization: str | None = Header(default=None)) -> JSONResponse:
+    async def run_curator_export(request: Request, authorization: str | None = Header(default=None)) -> JSONResponse:
         """Generate the full Curator ZIP from an app, dashboard, or service trigger."""
         if not current_settings.curator_trigger_token:
             return JSONResponse({"error": "Curator trigger token is not configured."}, status_code=503)
-        if not curator_authorized(authorization):
+        if not export_authorized(request, authorization):
             return JSONResponse({"error": "Curator trigger authorization failed."}, status_code=401)
         if curator_export_lock.locked():
             return JSONResponse({"error": "A Curator export is already running."}, status_code=409)
@@ -184,10 +196,10 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
             return JSONResponse({"error": "Curator export failed. Check the app logs."}, status_code=502)
 
     @application.get("/curator/export/latest.zip")
-    async def download_curator_export(authorization: str | None = Header(default=None)) -> Response:
+    async def download_curator_export(request: Request, authorization: str | None = Header(default=None)) -> Response:
         if not current_settings.curator_trigger_token:
             return JSONResponse({"error": "Curator trigger token is not configured."}, status_code=503)
-        if not curator_authorized(authorization):
+        if not export_authorized(request, authorization):
             return JSONResponse({"error": "Curator trigger authorization failed."}, status_code=401)
         exports = sorted(current_settings.curator_export_dir.glob("Curator_Report_*.zip"), reverse=True)
         if not exports:
@@ -199,7 +211,7 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
         """Generate bounded historical behavior evidence without changing Home Assistant."""
         if not current_settings.curator_trigger_token:
             return JSONResponse({"error": "Curator trigger token is not configured."}, status_code=503)
-        if not curator_authorized(authorization):
+        if not export_authorized(request, authorization):
             return JSONResponse({"error": "Behavior export authorization failed."}, status_code=401)
         if behavior_export_lock.locked():
             return JSONResponse({"error": "A behavior export is already running."}, status_code=409)
@@ -212,10 +224,10 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
             return JSONResponse({"error": "Behavior export failed. Check the app logs."}, status_code=502)
 
     @application.get("/behavior/export/latest.zip")
-    async def download_behavior_export(authorization: str | None = Header(default=None)) -> Response:
+    async def download_behavior_export(request: Request, authorization: str | None = Header(default=None)) -> Response:
         if not current_settings.curator_trigger_token:
             return JSONResponse({"error": "Curator trigger token is not configured."}, status_code=503)
-        if not curator_authorized(authorization):
+        if not export_authorized(request, authorization):
             return JSONResponse({"error": "Behavior export authorization failed."}, status_code=401)
         exports = sorted(current_settings.behavior_export_dir.glob("Behavior_History_*.zip"), reverse=True)
         if not exports:

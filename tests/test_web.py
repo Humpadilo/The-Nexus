@@ -99,6 +99,9 @@ def test_curator_export_requires_token_and_downloads_latest_zip(tmp_path: Path, 
     monkeypatch.setattr("archivist.main.create_export", fake_create_export)
 
     assert client.post("/curator/export").status_code == 401
+    ingress_client = TestClient(application, client=("172.30.32.2", 12345))
+    ingress_response = ingress_client.post("/curator/export", headers={"X-Remote-User-Id": "user-1"})
+    assert ingress_response.status_code == 200
     headers = {"Authorization": "Bearer test-token"}
     response = client.post("/curator/export", headers=headers)
     assert response.status_code == 200
@@ -126,6 +129,13 @@ def test_behavior_export_requires_token_and_downloads_latest_zip(tmp_path: Path,
     monkeypatch.setattr("archivist.main.create_behavior_export", fake_create_behavior_export)
 
     assert client.post("/behavior/export").status_code == 401
+    assert client.post("/behavior/export", headers={"X-Remote-User-Id": "spoofed"}).status_code == 401
+    ingress_client = TestClient(application, client=("172.30.32.2", 12345))
+    ingress_response = ingress_client.post("/behavior/export", headers={"X-Remote-User-Id": "user-1"})
+    assert ingress_response.status_code == 200
+    ingress_download = ingress_client.get("/behavior/export/latest.zip", headers={"X-Remote-User-Id": "user-1"})
+    assert ingress_download.status_code == 200
+    assert ingress_download.content.startswith(b"PK")
     headers = {"Authorization": "Bearer test-token"}
     response = client.post("/behavior/export", headers=headers)
     assert response.status_code == 200
@@ -136,3 +146,6 @@ def test_behavior_export_requires_token_and_downloads_latest_zip(tmp_path: Path,
     assert download.status_code == 200
     assert download.content.startswith(b"PK")
     assert client.get("/behavior/export/latest.zip").status_code == 401
+
+    page = client.get("/")
+    assert "test-token" not in page.text

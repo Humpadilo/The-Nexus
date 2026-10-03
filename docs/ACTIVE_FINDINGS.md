@@ -61,8 +61,8 @@ risk: House intelligence data could be exposed or exports could be triggered by 
 evidence: `archivist/main.py` exposes `POST /curator/export` and `GET /curator/export/latest.zip` without a token, session check, or origin check.
 root_cause: The service bridge trusts network reachability as authorization.
 recommended_fix: Require a dedicated internal token or authenticated request for both routes. Send the token from the Home Assistant custom integration and dashboard path.
-fix_evidence: Added bearer-token enforcement to both routes, configured the dashboard to send the token, and configured the Home Assistant bridge to send the token.
-verification: Unauthenticated requests return 401/403; authorized dashboard and Home Assistant service requests succeed; ingress continues to work.
+fix_evidence: Added bearer-token enforcement to direct/API requests, accepted Home Assistant's authenticated Ingress user headers only from the Supervisor Ingress address, removed the trigger token from dashboard JavaScript, and retained bearer-token service bridge access.
+verification: Tests cover rejected unauthenticated and spoofed Ingress-header requests, accepted bearer-token API requests, and accepted authenticated Ingress trigger/download requests. Live Home Assistant Ingress verification remains required.
 
 ## CURATOR-DEP-001
 
