@@ -1,0 +1,91 @@
+# Nexus Phase 1: Transit Activity
+#
+# This package is intended for Home Assistant's packages directory. It creates
+# one derived corridor-occupancy entity and makes this automation the sole
+# owner of light.stairs.
+
+template:
+  - binary_sensor:
+      - name: Nexus Transit Activity
+        unique_id: nexus_transit_activity
+        device_class: occupancy
+        icon: mdi:walk
+        state: >-
+          {{ is_state('binary_sensor.top_stairs_top_stairs_hallway_motion', 'on')
+             or is_state('binary_sensor.stairs_top_motion_motion', 'on')
+             or is_state('binary_sensor.stairs_bottom_motion_motion', 'on') }}
+        delay_off:
+          minutes: 3
+
+automation:
+  - id: nexus_transit_activity_stair_lighting
+    alias: Nexus - Transit Activity - Stair lighting
+    description: >-
+      Sole owner of stair lighting. Corridor motion is represented by Transit
+      Activity; Sleep keeps the intentional 20% warm navigation behavior.
+    mode: restart
+    triggers:
+      - trigger: state
+        entity_id: binary_sensor.nexus_transit_activity
+        to: "on"
+        id: transit_active
+      - trigger: state
+        entity_id: binary_sensor.nexus_transit_activity
+        to: "off"
+        id: transit_clear
+    conditions: []
+    actions:
+      - choose:
+          - conditions:
+              - condition: trigger
+                id: transit_active
+            sequence:
+              - choose:
+                  - conditions:
+                      - condition: template
+                        value_template: >-
+                          {{ states('input_select.house_mode') in ['Morning', 'Day'] }}
+                    sequence:
+                      - action: light.turn_on
+                        target:
+                          entity_id: light.stairs
+                        data:
+                          brightness_pct: 50
+                          color_temp_kelvin: 6535
+                          transition: 0
+                  - conditions:
+                      - condition: template
+                        value_template: >-
+                          {{ states('input_select.house_mode') in ['Evening', 'Night', 'Movie'] }}
+                    sequence:
+                      - action: light.turn_on
+                        target:
+                          entity_id: light.stairs
+                        data:
+                          brightness_pct: 30
+                          rgb_color:
+                            - 120
+                            - 192
+                            - 255
+                          transition: 0
+                  - conditions:
+                      - condition: state
+                        entity_id: input_select.house_mode
+                        state: Sleep
+                    sequence:
+                      - action: light.turn_on
+                        target:
+                          entity_id: light.stairs
+                        data:
+                          brightness_pct: 20
+                          color_temp_kelvin: 2200
+                          transition: 1
+          - conditions:
+              - condition: trigger
+                id: transit_clear
+            sequence:
+              - action: light.turn_off
+                target:
+                  entity_id: light.stairs
+                data:
+                  transition: 5

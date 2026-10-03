@@ -1,0 +1,654 @@
+- id: '1778983907738'
+  alias: Motion Lighting - Hallway and Sleep Navigation
+  description: Mode-aware hallway, living-room, and kitchen motion lighting; stair lighting is owned by Nexus Transit Activity
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.living_room_presence_motion
+    to: 'on'
+    id: living_room
+  - trigger: state
+    entity_id: binary_sensor.kitchen_entry_presence_motion
+    to: 'on'
+    id: kitchen
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: living_room
+      - condition: state
+        entity_id: input_select.house_mode
+        state: Sleep
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.living_room_tv
+          - light.living_room_bookshelf
+        data:
+          brightness_pct: 30
+          rgb_color:
+          - 120
+          - 192
+          - 255
+          transition: 2
+      - wait_template: "{{ is_state(\n  'binary_sensor.living_room_presence_motion',\n
+          \ 'off'\n) }}\n"
+      - delay:
+          minutes: 2
+      - condition: state
+        entity_id: binary_sensor.living_room_presence_motion
+        state: 'off'
+      - action: light.turn_off
+        target:
+          entity_id:
+          - light.living_room_tv
+          - light.living_room_bookshelf
+        data:
+          transition: 5
+    - conditions:
+      - condition: trigger
+        id: kitchen
+      - condition: state
+        entity_id: input_select.house_mode
+        state: Sleep
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.kitchen_pantry
+          - light.kitchen_bathroom
+        data:
+          brightness_pct: 30
+          rgb_color:
+          - 120
+          - 192
+          - 255
+          transition: 2
+      - wait_template: "{{ is_state(\n  'binary_sensor.kitchen_entry_presence_motion',\n
+          \ 'off'\n) }}\n"
+      - delay:
+          minutes: 2
+      - condition: state
+        entity_id: binary_sensor.kitchen_entry_presence_motion
+        state: 'off'
+      - action: light.turn_off
+        target:
+          entity_id:
+          - light.kitchen_pantry
+          - light.kitchen_bathroom
+        data:
+          transition: 5
+  mode: parallel
+  max: 10
+- id: '1778983931530'
+  alias: goodnight_sleep_routine
+  description: Manual sleep routine that turns off house devices and enables night
+    motion lighting
+  triggers: []
+  conditions: []
+  actions:
+  - action: input_boolean.turn_on
+    target:
+      entity_id: input_boolean.sleep_mode
+  - action: light.turn_off
+    target:
+      entity_id: light.house
+    data:
+      transition: 10
+  - action: media_player.turn_off
+    target:
+      entity_id:
+      - media_player.matts_room
+      - media_player.livingroom
+    continue_on_error: true
+  mode: single
+- id: '1778983954518'
+  alias: work_day_wakeup
+  description: Weekday wakeup routine triggered by iPhone alarm
+  triggers:
+  - trigger: webhook
+    webhook_id: matt_iphone_alarm_wakeup
+    local_only: false
+  conditions:
+  - condition: state
+    entity_id: person.matt_boyd
+    state: home
+  actions:
+  - action: input_select.select_option
+    target:
+      entity_id: input_select.house_mode
+    data:
+      option: Morning
+  - action: media_player.turn_on
+    target:
+      entity_id:
+      - media_player.livingroom
+  - action: scene.turn_on
+    target:
+      entity_id: scene.wake_up
+    data:
+      transition: 300
+  - delay:
+      minutes: 15
+  - action: media_player.turn_on
+    target:
+      entity_id: media_player.bedroom_matts_room
+  mode: single
+- id: '1778985787503'
+  alias: weekend_wakeup
+  description: Weekend structure wakeup routine for dogs and house rhythm
+  triggers:
+  - trigger: sun
+    event: sunrise
+    offset: +02:00:00
+  conditions:
+  - condition: time
+    weekday:
+    - sat
+    - sun
+  actions:
+  - action: input_select.select_option
+    target:
+      entity_id: input_select.house_mode
+    data:
+      option: Morning
+  - action: scene.turn_on
+    target:
+      entity_id: scene.wake_up
+    data:
+      transition: 300
+  mode: single
+- id: '1778987969332'
+  alias: test_bedroom_toggle
+  description: Experimental lighting test
+  triggers:
+  - trigger: state
+    entity_id: input_boolean.test_mode
+    to: 'on'
+  conditions: []
+  actions:
+  - repeat:
+      while:
+      - condition: state
+        entity_id: input_boolean.test_mode
+        state: 'on'
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.matts_bedroom_light_1
+        data:
+          rgb_color:
+          - 255
+          - 0
+          - 0
+          brightness_pct: 100
+          transition: 0
+      - delay:
+          milliseconds: 300
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.matts_bedroom_light_2
+        data:
+          rgb_color:
+          - 255
+          - 0
+          - 0
+          brightness_pct: 100
+          transition: 0
+      - delay:
+          milliseconds: 300
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.matts_bedroom_light_3
+        data:
+          rgb_color:
+          - 255
+          - 0
+          - 0
+          brightness_pct: 100
+          transition: 0
+      - delay:
+          milliseconds: 300
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.matts_bedroom_light_4
+        data:
+          rgb_color:
+          - 255
+          - 0
+          - 0
+          brightness_pct: 100
+          transition: 0
+      - delay:
+          milliseconds: 500
+      - action: light.turn_on
+        target:
+          entity_id: light.matt_s_bedroom
+        data:
+          rgb_color:
+          - 255
+          - 255
+          - 255
+          brightness_pct: 100
+          transition: 0
+      - delay:
+          milliseconds: 400
+      - action: light.turn_on
+        target:
+          entity_id: light.matt_s_bedroom
+        data:
+          rgb_color:
+          - 120
+          - 0
+          - 0
+          brightness_pct: 40
+          transition: 1
+      - delay:
+          seconds: 2
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.matts_bedroom_light_1
+          - light.matts_bedroom_light_3
+        data:
+          rgb_color:
+          - 255
+          - 40
+          - 40
+          brightness_pct: 100
+          transition: 0
+      - delay:
+          milliseconds: 200
+      - action: light.turn_on
+        target:
+          entity_id:
+          - light.matts_bedroom_light_2
+          - light.matts_bedroom_light_4
+        data:
+          rgb_color:
+          - 255
+          - 0
+          - 0
+          brightness_pct: 15
+          transition: 0
+      - delay:
+          milliseconds: 200
+      - action: light.turn_off
+        target:
+          entity_id: light.matt_s_bedroom
+        data:
+          transition: 0
+      - delay:
+          milliseconds: 500
+  mode: restart
+- id: '1778990033469'
+  alias: test_bedroom_toggle_off
+  description: Turn off bedroom test lighting
+  triggers:
+  - trigger: state
+    entity_id: input_boolean.test_mode
+    to: 'off'
+  conditions: []
+  actions:
+  - action: light.turn_off
+    target:
+      entity_id: light.matt_s_bedroom
+    data:
+      transition: 5
+  mode: restart
+- id: '1780880073397'
+  alias: Morning To Day
+  description: Change house from Morning mode to Day mode after one hour if Matt is
+    home
+  triggers:
+  - trigger: state
+    entity_id: input_select.house_mode
+    to: Morning
+    for:
+      hours: 1
+  conditions:
+  - condition: state
+    entity_id: person.matt_boyd
+    state: home
+  actions:
+  - action: input_select.select_option
+    target:
+      entity_id: input_select.house_mode
+    data:
+      option: Day
+  - action: scene.turn_on
+    target:
+      entity_id: scene.day_time
+  mode: single
+- id: '1780880086627'
+  alias: Arrive Home Day Mode
+  description: If Matt comes home and the house is still in Morning mode, switch to
+    Day mode
+  triggers:
+  - trigger: state
+    entity_id: person.matt_boyd
+    to: home
+  conditions:
+  - condition: state
+    entity_id: input_select.house_mode
+    state: Morning
+  actions:
+  - action: input_select.select_option
+    target:
+      entity_id: input_select.house_mode
+    data:
+      option: Day
+  - action: scene.turn_on
+    target:
+      entity_id: scene.day_time
+  mode: single
+- id: '1783316279058'
+  alias: House Mode - Vacation Activated
+  description: Runs when Vacation mode is enabled without leaving Vacation mode
+  triggers:
+  - trigger: state
+    entity_id: input_select.house_mode
+    to: Vacation
+  conditions: []
+  actions:
+  - action: light.turn_off
+    target:
+      entity_id: light.house
+    data:
+      transition: 5
+  - choose:
+    - conditions:
+      - condition: or
+        conditions:
+        - condition: time
+          after: '22:00:00'
+        - condition: time
+          before: 07:00:00
+      sequence:
+      - action: media_player.turn_off
+        target:
+          entity_id:
+          - media_player.bedroom_matts_room
+          - media_player.livingroom
+        continue_on_error: true
+  mode: single
+- id: '1783316945946'
+  alias: Vacation Schedule
+  description: Simulates normal morning and nighttime activity while preserving Vacation
+    mode
+  triggers:
+  - trigger: time
+    at: 07:00:00
+    id: morning
+  - trigger: time
+    at: '22:00:00'
+    id: night
+  conditions:
+  - condition: state
+    entity_id: input_select.house_mode
+    state: Vacation
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: morning
+      sequence:
+      - action: scene.turn_on
+        target:
+          entity_id: scene.wake_up
+      - delay:
+          minutes: 15
+      - action: media_player.turn_on
+        target:
+          entity_id: media_player.livingroom
+        continue_on_error: true
+    - conditions:
+      - condition: trigger
+        id: night
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id: light.house
+        data:
+          transition: 10
+      - action: media_player.turn_off
+        target:
+          entity_id:
+          - media_player.bedroom_matts_room
+          - media_player.livingroom
+        continue_on_error: true
+  mode: single
+- id: '1786743877595'
+  alias: Bedroom Soft Blue Motion Light
+  description: Turn on dim cool-blue bedroom lighting with motion unless Nap Mode
+    or Sleep mode is active
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.matt_s_bedroom_matts_bedroom_presence_motion
+    to: 'on'
+    id: motion_on
+  - trigger: state
+    entity_id: input_boolean.nap_mode
+    to: 'on'
+    id: nap_on
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: nap_on
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id: light.matt_s_bedroom
+        data:
+          transition: 1
+    - conditions:
+      - condition: trigger
+        id: motion_on
+      - condition: state
+        entity_id: input_boolean.nap_mode
+        state: 'off'
+      - condition: template
+        value_template: '{{ states(''input_select.house_mode'') != ''Sleep'' }}'
+      - condition: state
+        entity_id: light.matt_s_bedroom
+        state: 'off'
+      sequence:
+      - action: light.turn_on
+        target:
+          entity_id: light.matt_s_bedroom
+        data:
+          brightness_pct: 15
+          rgb_color:
+          - 150
+          - 190
+          - 255
+          transition: 1
+  mode: restart
+- id: '1786743968451'
+  alias: Bathroom Motion Soft Blue Light
+  description: Turn on bathroom lighting immediately with motion; turn off after 30
+    clear minutes during daytime, with nighttime safety handling
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.matts_bathroom_matts_bathroom_presence_motion
+    to: 'on'
+    id: motion_on
+  - trigger: state
+    entity_id: binary_sensor.matts_bathroom_matts_bathroom_presence_motion
+    to: 'off'
+    for: 00:30:00
+    id: motion_clear
+  conditions: []
+  actions:
+  - choose:
+    - conditions:
+      - condition: trigger
+        id: motion_on
+      - condition: state
+        entity_id: light.matt_s_bathroom
+        state: 'off'
+      sequence:
+      - choose:
+        - conditions:
+          - condition: state
+            entity_id: sun.sun
+            state: above_horizon
+          sequence:
+          - action: light.turn_on
+            target:
+              entity_id: light.matt_s_bathroom
+            data:
+              brightness_pct: 100
+              rgb_color:
+              - 150
+              - 190
+              - 255
+              transition: 0
+        default:
+        - action: light.turn_on
+          target:
+            entity_id: light.matt_s_bathroom
+          data:
+            brightness_pct: 30
+            rgb_color:
+            - 150
+            - 190
+            - 255
+            transition: 0
+    - conditions:
+      - condition: trigger
+        id: motion_clear
+      sequence:
+      - action: light.turn_off
+        target:
+          entity_id: light.matt_s_bathroom
+        data:
+          transition: 1
+  mode: restart
+- id: '1786745906676'
+  alias: Bathroom Light Clear Safety Check
+  description: 'Safety shutoff: 30 minutes without motion while sun is up; 5 minutes
+    at night'
+  triggers:
+  - trigger: time_pattern
+    minutes: /1
+  conditions:
+  - condition: state
+    entity_id: light.matt_s_bathroom
+    state: 'on'
+  - condition: template
+    value_template: "{% set sensor = states.binary_sensor.matts_bathroom_matts_bathroom_presence_motion
+      %}\n{% set timeout = 1800 if is_state('sun.sun', 'above_horizon') else 300 %}\n{{
+      is_state(sensor.entity_id, 'off')\n   and (as_timestamp(now()) - as_timestamp(sensor.last_changed))
+      >= timeout }}"
+  actions:
+  - action: light.turn_off
+    target:
+      entity_id: light.matt_s_bathroom
+    data:
+      transition: 1
+  mode: single
+- id: '1786746141185'
+  alias: Downstairs Motion Occupancy Lighting
+  description: Keep downstairs lights on for motion, restore bright daytime lighting,
+    and treat antenna TV as dog mode
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.kitchen_entry_presence_motion
+    to: 'on'
+    id: kitchen_motion
+  - trigger: state
+    entity_id: binary_sensor.living_room_presence_motion
+    to: 'on'
+    id: living_room_motion
+  conditions: []
+  actions:
+  - action: light.turn_on
+    target:
+      entity_id:
+      - light.kitchen
+      - light.living_room
+    data:
+      brightness_pct: 100
+      rgb_color:
+      - 253
+      - 255
+      - 253
+      transition: 0
+  - wait_template: "{{ is_state('binary_sensor.kitchen_entry_presence_motion', 'off')\n
+      \  and is_state('binary_sensor.living_room_presence_motion', 'off')\n   and
+      not (\n     is_state('media_player.livingroom', 'playing')\n     and (state_attr('media_player.livingroom',
+      'source') | default('', true))\n       not in ['', none, 'Live TV Input', 'Live
+      TV']\n   ) }}"
+  - delay: 00:30:00
+  - condition: template
+    value_template: "{{ is_state('binary_sensor.kitchen_entry_presence_motion', 'off')\n
+      \  and is_state('binary_sensor.living_room_presence_motion', 'off')\n   and
+      not (\n     is_state('media_player.livingroom', 'playing')\n     and (state_attr('media_player.livingroom',
+      'source') | default('', true))\n       not in ['', none, 'Live TV Input', 'Live
+      TV']\n   ) }}"
+  - action: light.turn_off
+    target:
+      entity_id:
+      - light.kitchen
+      - light.living_room
+    data:
+      transition: 1
+  mode: restart
+- id: '1788101279974'
+  alias: Bathroom - Sleep Motion Lighting
+  description: Soft blue bathroom lighting during Sleep mode
+  triggers:
+  - trigger: state
+    entity_id: binary_sensor.matts_bathroom_matts_bathroom_presence_motion
+    to: 'on'
+  conditions:
+  - condition: state
+    entity_id: input_select.house_mode
+    state: Sleep
+  actions:
+  - action: light.turn_on
+    target:
+      entity_id: light.matt_s_bathroom
+    data:
+      brightness_pct: 25
+      rgb_color:
+      - 120
+      - 192
+      - 255
+      transition: 0
+  - wait_template: "{{ is_state(\n  'binary_sensor.matts_bathroom_matts_bathroom_presence_motion',\n
+      \ 'off'\n) }}\n"
+  - delay:
+      minutes: 5
+  - condition: state
+    entity_id: binary_sensor.matts_bathroom_matts_bathroom_presence_motion
+    state: 'off'
+  - action: light.turn_off
+    target:
+      entity_id: light.matt_s_bathroom
+    data:
+      transition: 5
+  mode: restart
+- id: '1788108843992'
+  alias: Nap - Timer Finished
+  description: Restores bedroom lighting when the nap timer expires
+  triggers:
+  - trigger: event
+    event_type: timer.finished
+    event_data:
+      entity_id: timer.nap_timer
+  conditions:
+  - condition: state
+    entity_id: input_boolean.nap_mode
+    state: 'on'
+  actions:
+  - action: script.nap_end
+  mode: single
