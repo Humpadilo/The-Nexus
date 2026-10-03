@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from typing import Any
+from urllib.parse import urlencode
 
 import aiohttp
 
@@ -43,6 +44,48 @@ class HomeAssistantClient:
                     return await response.json()
         except (aiohttp.ClientError, asyncio.TimeoutError) as exc:
             raise HomeAssistantApiError(str(exc)) from exc
+
+    async def get_history(
+        self,
+        start: str,
+        *,
+        end: str | None = None,
+        entity_ids: list[str] | None = None,
+    ) -> list[Any]:
+        """Read one bounded Home Assistant recorder-history window.
+
+        This calls the official REST history endpoint and deliberately leaves
+        chunking and maximum-window policy to the behavior service.
+        """
+        if not entity_ids:
+            raise HomeAssistantApiError("refusing unfiltered history request")
+        params: dict[str, str] = {"minimal_response": "0", "no_attributes": "0"}
+        if end:
+            params["end_time"] = end
+        if entity_ids:
+            params["filter_entity_id"] = ",".join(entity_ids)
+        path = f"/history/period/{start}?{urlencode(params)}"
+        result = await self.get_json(path)
+        return result if isinstance(result, list) else []
+
+    async def get_logbook(
+        self,
+        start: str,
+        *,
+        end: str | None = None,
+        entity_ids: list[str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Read one bounded Home Assistant logbook window."""
+        if not entity_ids:
+            raise HomeAssistantApiError("refusing unfiltered logbook request")
+        params: dict[str, str] = {}
+        if end:
+            params["end_time"] = end
+        if entity_ids:
+            params["entity"] = ",".join(entity_ids)
+        query = f"?{urlencode(params)}" if params else ""
+        result = await self.get_json(f"/logbook/{start}{query}")
+        return result if isinstance(result, list) else []
 
     async def get_text(self, path: str) -> str:
         """Read a text endpoint through the Home Assistant API proxy."""

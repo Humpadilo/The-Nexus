@@ -44,6 +44,7 @@ def test_health_and_ingress_page(tmp_path: Path) -> None:
     assert "Understand your home." in page.text
     assert "Curator" in page.text
     assert "The House Dreams Peacefully" in page.text
+    assert "Generate behavior ZIP" in page.text
     assert client.get("/static/styles.css").status_code == 200
 
 
@@ -107,3 +108,31 @@ def test_curator_export_requires_token_and_downloads_latest_zip(tmp_path: Path, 
     assert download.status_code == 200
     assert download.content.startswith(b"PK")
     assert client.get("/curator/export/latest.zip").status_code == 401
+
+
+def test_behavior_export_requires_token_and_downloads_latest_zip(tmp_path: Path, monkeypatch) -> None:
+    settings = Settings(data_dir=tmp_path, curator_trigger_token="test-token", schedule_enabled=False)
+    database = Database(settings.database_path)
+    application = create_app(settings, database)
+    client = TestClient(application)
+
+    async def fake_create_behavior_export(*, settings):
+        settings.behavior_export_dir.mkdir(parents=True, exist_ok=True)
+        archive = settings.behavior_export_dir / "Behavior_History_2026-08-01_120000.zip"
+        with zipfile.ZipFile(archive, "w") as bundle:
+            bundle.writestr("behavior_report.json", '{"read_only": true}')
+        return archive
+
+    monkeypatch.setattr("archivist.main.create_behavior_export", fake_create_behavior_export)
+
+    assert client.post("/behavior/export").status_code == 401
+    headers = {"Authorization": "Bearer test-token"}
+    response = client.post("/behavior/export", headers=headers)
+    assert response.status_code == 200
+    assert response.json()["filename"] == "Behavior_History_2026-08-01_120000.zip"
+    assert response.json()["read_only"] is True
+
+    download = client.get("/behavior/export/latest.zip", headers=headers)
+    assert download.status_code == 200
+    assert download.content.startswith(b"PK")
+    assert client.get("/behavior/export/latest.zip").status_code == 401

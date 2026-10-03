@@ -9,6 +9,7 @@ from homeassistant.core import HomeAssistant, ServiceCall
 
 DOMAIN = "archivist"
 SERVICE_RUN_CURATOR = "run_curator"
+SERVICE_RUN_BEHAVIOR = "run_behavior_export"
 CONF_ENDPOINT_URL = "endpoint_url"
 CONF_TRIGGER_TOKEN = "trigger_token"
 DEFAULT_ENDPOINT_URL = "http://the_archivist:8099"
@@ -48,5 +49,13 @@ async def async_setup(hass: HomeAssistant, config: dict) -> bool:
                 if response.status >= 400:
                     raise RuntimeError(await response.text())
 
+    async def handle_run_behavior(_: ServiceCall) -> None:
+        async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=600)) as session:
+            headers = {"Authorization": f"Bearer {trigger_token}"} if trigger_token else {}
+            async with session.post(f"{endpoint_url}/behavior/export", headers=headers) as response:
+                if response.status >= 400:
+                    raise RuntimeError(await response.text())
+
     hass.services.async_register(DOMAIN, SERVICE_RUN_CURATOR, handle_run_curator, schema=vol.Schema({}))
+    hass.services.async_register(DOMAIN, SERVICE_RUN_BEHAVIOR, handle_run_behavior, schema=vol.Schema({}))
     return True

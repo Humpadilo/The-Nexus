@@ -1,3 +1,7 @@
 run_curator:
   name: Run Curator export
   description: Generate a read-only Curator intelligence ZIP in the Archivist add-on.
+
+run_behavior_export:
+  name: Run behavior history export
+  description: Generate a bounded, read-only Home Assistant history and logbook behavior report.

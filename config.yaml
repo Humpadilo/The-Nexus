@@ -1,5 +1,5 @@
 name: The Archivist
-version: "0.8.3"
+version: "0.8.4"
 slug: the_archivist
 description: Read-only local snapshots and audits of a Home Assistant instance.
 url: https://github.com/Humpadilo/The-Nexus
@@ -22,11 +22,19 @@ options:
   schedule_interval_hours: 24
   finding_retention_days: 365
   curator_trigger_token: ""
+  behavior_history_days: 30
+  behavior_history_max_events: 20000
+  behavior_history_max_entities: 150
+  behavior_history_chunk_hours: 24
 schema:
   schedule_enabled: bool
   schedule_interval_hours: int(1,168)
   finding_retention_days: int(30,3650)
   curator_trigger_token: str
+  behavior_history_days: int(1,90)
+  behavior_history_max_events: int(100,100000)
+  behavior_history_max_entities: int(1,500)
+  behavior_history_chunk_hours: int(1,24)
 ports:
   8099/tcp: null
 ports_description:

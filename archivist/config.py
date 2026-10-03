@@ -56,6 +56,28 @@ class Settings:
         or str(_APP_OPTIONS.get("curator_trigger_token", "")).strip()
         or None
     )
+    behavior_history_days: int = max(1, min(90, _option_int("behavior_history_days", 30)))
+    behavior_history_max_events: int = max(100, min(100000, _option_int("behavior_history_max_events", 20000)))
+    behavior_history_max_entities: int = max(1, min(500, _option_int("behavior_history_max_entities", 150)))
+    behavior_history_chunk_hours: int = max(1, min(24, _option_int("behavior_history_chunk_hours", 24)))
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "behavior_history_days", max(1, min(90, int(self.behavior_history_days))))
+        object.__setattr__(
+            self,
+            "behavior_history_max_events",
+            max(100, min(100000, int(self.behavior_history_max_events))),
+        )
+        object.__setattr__(
+            self,
+            "behavior_history_max_entities",
+            max(1, min(500, int(self.behavior_history_max_entities))),
+        )
+        object.__setattr__(
+            self,
+            "behavior_history_chunk_hours",
+            max(1, min(24, int(self.behavior_history_chunk_hours))),
+        )
 
     @property
     def database_path(self) -> Path:
@@ -74,3 +96,7 @@ class Settings:
         if self.runtime_environment == "home_assistant_addon":
             return self.data_dir / "Inventory" / "Exports"
         return Path.cwd() / "Inventory" / "Exports"
+
+    @property
+    def behavior_export_dir(self) -> Path:
+        return self.curator_export_dir / "Behavior"

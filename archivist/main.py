@@ -17,6 +17,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from archivist.api.home_assistant import HomeAssistantClient
+from archivist.behavior.service import create_behavior_export
 from archivist.collector.service import Collector
 from archivist.config import Settings
 from archivist.curator.exporter import create_export
@@ -39,6 +40,7 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
     current_database = app_database or Database(current_settings.database_path)
     templates = Jinja2Templates(directory=str(TEMPLATES_DIRECTORY))
     curator_export_lock = asyncio.Lock()
+    behavior_export_lock = asyncio.Lock()
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> Iterator[None]:
@@ -190,6 +192,34 @@ def create_app(app_settings: Settings | None = None, app_database: Database | No
         exports = sorted(current_settings.curator_export_dir.glob("Curator_Report_*.zip"), reverse=True)
         if not exports:
             return JSONResponse({"error": "No Curator export has been generated yet."}, status_code=404)
+        return FileResponse(exports[0], filename=exports[0].name, media_type="application/zip")
+
+    @application.post("/behavior/export")
+    async def run_behavior_export(authorization: str | None = Header(default=None)) -> JSONResponse:
+        """Generate bounded historical behavior evidence without changing Home Assistant."""
+        if not current_settings.curator_trigger_token:
+            return JSONResponse({"error": "Curator trigger token is not configured."}, status_code=503)
+        if not curator_authorized(authorization):
+            return JSONResponse({"error": "Behavior export authorization failed."}, status_code=401)
+        if behavior_export_lock.locked():
+            return JSONResponse({"error": "A behavior export is already running."}, status_code=409)
+        try:
+            async with behavior_export_lock:
+                archive = await create_behavior_export(settings=current_settings)
+            return JSONResponse({"status": "success", "filename": archive.name, "download_url": "behavior/export/latest.zip", "read_only": True})
+        except Exception:
+            logger.exception("behavior_export_failed")
+            return JSONResponse({"error": "Behavior export failed. Check the app logs."}, status_code=502)
+
+    @application.get("/behavior/export/latest.zip")
+    async def download_behavior_export(authorization: str | None = Header(default=None)) -> Response:
+        if not current_settings.curator_trigger_token:
+            return JSONResponse({"error": "Curator trigger token is not configured."}, status_code=503)
+        if not curator_authorized(authorization):
+            return JSONResponse({"error": "Behavior export authorization failed."}, status_code=401)
+        exports = sorted(current_settings.behavior_export_dir.glob("Behavior_History_*.zip"), reverse=True)
+        if not exports:
+            return JSONResponse({"error": "No behavior export has been generated yet."}, status_code=404)
         return FileResponse(exports[0], filename=exports[0].name, media_type="application/zip")
 
     @application.get("/watcher/findings")

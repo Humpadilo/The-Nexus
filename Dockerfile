@@ -14,7 +14,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY archivist ./archivist
 COPY rootfs /
-RUN chmod +x /usr/local/bin/archivist /usr/local/bin/curator-export
+RUN chmod +x /usr/local/bin/archivist /usr/local/bin/curator-export /usr/local/bin/behavior-history-export
 
 EXPOSE 8099
 CMD ["/usr/local/bin/archivist"]

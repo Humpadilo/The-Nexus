@@ -55,7 +55,7 @@ Inside the Home Assistant add-on, run `python -m archivist.curator.exporter`; it
 
 ### Deploy and verify Curator in Home Assistant
 
-The Curator must be executed inside the Archivist app container for a production report. The add-on manifest requests both the Home Assistant Core API proxy and the Supervisor API, and version `0.8.3` is the deployment marker for the room-capability export and trigger-based exporter.
+The Curator must be executed inside the Archivist app container for a production report. The add-on manifest requests both the Home Assistant Core API proxy and the Supervisor API, and version `0.8.4` is the deployment marker for the room-capability export and trigger-based exporter.
 
 1. Build the updated add-on. If using a local Home Assistant add-on repository, copy or pull this repository into the local repository directory, then build it from the Home Assistant host:
 
@@ -63,9 +63,9 @@ The Curator must be executed inside the Archivist app container for a production
    ha addons rebuild the_archivist
    ```
 
-   If the Home Assistant installation does not provide `rebuild`, reload the local add-on repository, open **Settings → Apps → The Archivist**, and use **Rebuild** from the add-on menu. For a standalone Docker build, run `docker build -t the-archivist:0.8.0 .`; that image is not a production Home Assistant verification.
+   If the Home Assistant installation does not provide `rebuild`, reload the local add-on repository, open **Settings → Apps → The Archivist**, and use **Rebuild** from the add-on menu. For a standalone Docker build, run `docker build -t the-archivist:0.8.4 .`; that image is not a production Home Assistant verification.
 
-2. Install or update the add-on from **Settings → Apps → The Archivist**. Confirm that the installed version is `0.8.3`, start the add-on, and wait until its health/status is running. The add-on must retain `homeassistant_api: true` and `hassio_api: true` in its manifest.
+2. Install or update the add-on from **Settings → Apps → The Archivist**. Confirm that the installed version is `0.8.4`, start the add-on, and wait until its health/status is running. The add-on must retain `homeassistant_api: true` and `hassio_api: true` in its manifest.
 
 3. Run the Curator inside the add-on. From the Home Assistant host terminal or an SSH session, identify the container with `docker ps --format '{{.Names}}' | grep archivist`, then run:
 
@@ -116,3 +116,11 @@ service: archivist.run_curator
 ```
 
 If `the_archivist` is not resolvable from Core, set `endpoint_url` to the Archivist app hostname shown on the app information page, retaining port `8099`. The bridge performs only an authenticated HTTP POST to the add-on's read-only trigger. The ZIP download also requires the bearer token.
+
+### Bounded behavior history export
+
+The add-on also provides a separate, read-only behavior analysis export for ChatGPT/Codex. It discovers motion, presence, person, device-tracker, light, and media entities from current states and registries, then reads only bounded Home Assistant Core history and logbook windows for those discovered entities. If discovery returns no behavior entities, history and logbook reads are skipped instead of making an unfiltered request. The default is 30 days, in 24-hour API chunks, capped at 90 days, 500 entities, and 20,000 history events by default. No recorder database is copied and no Home Assistant entity or automation is changed.
+
+Trigger it from the Ingress Reports panel, with `POST /behavior/export` using the same bearer token as the Curator trigger, or by calling the `archivist.run_behavior_export` Home Assistant service after installing the custom integration. The downloadable ZIP is available at `/behavior/export/latest.zip`; it contains `behavior_report.json` under `/data/Inventory/Exports/Behavior/`. Configure `behavior_history_days`, `behavior_history_max_events`, `behavior_history_max_entities`, and `behavior_history_chunk_hours` in the add-on options when needed. `behavior_history_max_events` may be raised as high as 100,000. The report records timestamps/timezone, sample sizes, API errors, data-quality gaps, event timelines, hourly/daily aggregates, first/last activity, arrival patterns, area-supported motion transitions, light-to-motion relationships, and only labels user-context logbook entries as possible manual corrections.
+
+For a shell invocation inside the add-on, run `/usr/local/bin/behavior-history-export` (or `python -m archivist.behavior.service`); standalone development writes to `./Inventory/Exports/Behavior/` unless `--output-dir` is supplied. The exporter uses only the official read-only `/history/period` and `/logbook` APIs in bounded chunks and never copies the recorder database.

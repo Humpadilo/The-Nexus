@@ -42,6 +42,8 @@ source_values: Curator Report | Manual Review | Static Analysis | Live Testing |
 | CURATOR-TEST-002 | HIGH | TESTING | OPEN | Engineer | Custom integration is not tested inside Home Assistant |
 | CURATOR-TEST-003 | MEDIUM | TESTING | OPEN | Engineer | Full local test suite is not green because of temp-directory permissions |
 
+Behavior history analysis is intentionally implemented as a separate Archivist behavior export and does not change Curator responsibilities or existing finding lifecycles.
+
 ## Issues
 
 ## CURATOR-SEC-001
