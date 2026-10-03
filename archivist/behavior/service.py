@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import argparse
+import asyncio
 import json
 import re
 import zipfile
@@ -9,7 +11,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 from archivist.api.home_assistant import HomeAssistantClient
 from archivist.config import Settings
@@ -539,7 +541,7 @@ class BehaviorHistoryService:
         return gaps
 
 
-async def create_behavior_export(*, settings: Settings) -> Path:
+async def create_behavior_export(*, settings: Settings, output_dir: Path | None = None) -> Path:
     client = HomeAssistantClient(settings.ha_rest_url, settings.ha_ws_url, settings.supervisor_token)
     service = BehaviorHistoryService(
         client,
@@ -549,4 +551,16 @@ async def create_behavior_export(*, settings: Settings) -> Path:
         chunk_hours=settings.behavior_history_chunk_hours,
     )
     report = await service.run()
-    return BehaviorHistoryExporter(settings.behavior_export_dir).write(report)
+    return BehaviorHistoryExporter(output_dir or settings.behavior_export_dir).write(report)
+
+
+def main(argv: Sequence[str] | None = None) -> None:
+    parser = argparse.ArgumentParser(description="Generate a bounded read-only behavior history export.")
+    parser.add_argument("--output-dir", type=Path, default=None, help="Optional export directory override.")
+    args = parser.parse_args(argv)
+    archive = asyncio.run(create_behavior_export(settings=Settings(), output_dir=args.output_dir))
+    print(archive)
+
+
+if __name__ == "__main__":
+    main()
